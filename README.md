@@ -1,2 +1,2 @@
-# parcio-2021g4
-Übungsblätter Parallele Programmierung 2021
+# Parallele Programmierung 2021
+Übungsblätter ÜG 4
