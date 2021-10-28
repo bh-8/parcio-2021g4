@@ -1,0 +1,53 @@
+gdb ./simple
+
+---
+
+(gdb) break mistake1
+	Breakpoint 1, mistake1 () at simple.c:11
+(gdb) display buf
+	1: buf = {134217792, 0, 15775231, 0, 194, 0}
+(gdb) display buf[2]
+	2: buf[2] = 15775231
+(gdb) next
+	1: buf = {134217792, 0, 15775231, 0, 194, 0}
+	2: buf[2] = 15775231
+(gdb) next
+	1: buf = {1, 1, 2, 3, 4, 5}
+	2: buf[2] = 2
+Von welchem Typ ist buf?
+	buf ist ein Integer-Array.
+
+---
+
+(gdb) break mistake2
+	Breakpoint 2, mistake2 () at simple.c:19
+(gdb) display buf
+	3: buf = (int *) 0x992058b54a3e8600
+Von welchem Typ ist buf?
+	buf ist ein Zeiger auf einen Integer.
+
+---
+
+Setzen Sie den Programmlauf fort, welcher Text wird ausgegeben?
+(gdb) continue
+	Program received signal SIGSEGV, Segmentation fault.
+	main () at simple.c:56
+	56              printf("1: %d\n", *p[0]);
+
+Lassen Sie sich den Code um diese Stelle herum ausgeben.
+Welche Frames sind auf dem Stack?
+(gdb) backtrace full
+	#0  main () at simple.c:56
+		p = {0x4, 0x80052a4, 0x8001209 <mistake2>, 0x80052c0}
+(gdb) frame 1
+	No frame at level 1.
+(gdb) frame 0
+	#0  main () at simple.c:56
+	56              printf("1: %d\n", *p[0]);
+(gdb) display p
+	4: p = {0x4, 0x80052a4, 0x8001209 <mistake2>, 0x80052c0}
+
+---
+
+(gdb) call mistake4
+$3 = {int *(void)} 0x8001261 <mistake4>

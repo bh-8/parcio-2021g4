@@ -1,0 +1,38 @@
+Behobene Fehler:
+
+simple.c: In function ‘mistake1’:
+simple.c:10:
+	Speicher muss z.B. mit 'malloc(sizeof(int) * 6);' angefordert werden,
+	da das Int-Array nur lokal in der Funktion verfügbar ist, allerdings
+	der Speicher außerhalb der Funktion benutzt werden soll. (Speicher muss
+	auf dem Heap sein, nicht auf dem Stack) Anschließend müssen die lokalen
+	Daten noch an den global reservierten Bereich kopiert werden.
+
+simple.c: In function ‘mistake2’:
+simple.c:23:
+	int* buf = malloc(sizeof(char) * 8);
+	Speicher wurde für 4 characters angefordert, was allerdings für ein
+	Integer-Array der Länge 3 nicht ausreichend ist. Da allerdings nur das
+	Datum auf dem Index 1 benutzt werden soll, reichen 8 Bytes aus. (die
+	ersten 4 Bytes bleiben ungenutzt)
+
+simple.c: In function ‘mistake3’:
+	Es wird wieder lokaler Stackspeicher zurückgegeben. Da hier keine
+	direkte Speicherallokation erlaubt ist, verwenden wir mistake2(), um
+	uns indirekt Speicher zu reservieren.
+
+simple.c: In function ‘mistake4’:
+simple.c:45:
+	buf[0] = 4;
+	Die 4 muss auf den 0. Index und nicht auf den 4. Zusätzlich darf in der
+	Funktion direkt kein Speicher freigegeben werden, sondern erst am Ende.
+
+simple.c: In function ‘main’:
+simple.c:66:
+	free(p[0] - 1);
+	free(p[1] - 1);
+	free(p[3]);
+	-1, da der Zeiger p[0] bzw. p[1] auf das 5. Byte eines 24 Byte bzw. 8
+	Byte großen Blocks zeigt.  Durch -1 wird der Pointer 4 Bytes
+	zurückversetzt (ein Int-Wert), wodurch der berechnete Pointer dann auch
+	das 1. Byte des entsprechenden Blocks zeigt.

@@ -1,0 +1,12 @@
+partdiff.c:140:
+	Es wird fälschlicherweise auf das 333. Argument zugegriffen und nicht
+	das dritte.
+
+partdiff.c:231:
+	Hier wird durch "(N - 1)" nicht Platz für eine NxN Matrix alloziiert,
+	sondern für eine Nx(N - 2).
+
+partdiff.c:340:
+	Beim zweiten Summanden in der Klammer wurden die Array-Access-
+	Operatoren vertauscht, wodurch es ab j==3 zu einem Zugriff auf
+	uninitialisierten Speicher kommt.

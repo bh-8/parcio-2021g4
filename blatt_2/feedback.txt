@@ -1,0 +1,26 @@
+Die Bearbeitungszeit bitte in ganzen Stunden angeben (aufrunden).
+In den restlichen Zeilen jeweils ein X in der zutreffenden Spalte setzen.
+
+Bearbeitungszeit:  
+Schwierigkeit:     [ ] zu leicht         [X] genau richtig     [ ] zu schwer
+Lehrreich:         [ ] wenig             [ ] etwas             [X] sehr
+Verständlichkeit:  [ ] großteils unklar  [X] teilweise unklar  [ ] verständlich
+
+Kommentar:
+Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen?
+Bei der "indirekten" Speicherallokierung war nicht klar, was genau gefordert
+ist.
+
+Was war zu schwer oder unverständlich?
+Bei der simple-Aufgabe wäre eine genauere Beschreibung, was mit "darf kein
+Speicher direkt allokiert werden" gemeint ist, vorteilhaft gewesen
+(unsere Ideen waren static und globale Variablen, allerdings sind beide
+Möglichkeiten auf dem Blatt ausgeschlossen).
+
+Was könnten wir verbessern?
+Bis auf die bereits angesprochene "indirekte" Speicherallokation (wo sich uns
+der Sinn nicht ganz erschließt) war alles top.
+
+Was hat Ihnen besonders gut gefallen?
+Die Einführung in die Tools gdb und valgrind (anhand eines einfachen und eines
+etwas komplexeren Programms) ist sehr gut gelungen.

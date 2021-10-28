@@ -1,0 +1,4 @@
+Gregor Goepfert <gregor.goepfert@st.ovgu.de>
+Tim Welzer <tim.welzer@st.ovgu.de>
+Philipp David <philipp.david@st.ovgu.de>
+Bernhard Birnbaum <bernhard.birnbaum@st.ovgu.de>

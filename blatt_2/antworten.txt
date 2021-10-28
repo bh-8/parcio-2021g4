@@ -1,0 +1,75 @@
+Was bedeuten die Begriffe Job Scheduler bzw. Batch Scheduling?
+- Job Scheduler steuern die unbeaufsichtigte Ausführung von Jobs bzw.
+  Aufgaben/Hintergrundprogrammen.
+
+Welche Aufgaben hat ein Job Scheduler?
+Ein Job-Scheduler soll u.a. dafür sorgen, dass
+- möglichst viele Prozesse in kurzer Zeit abgearbeitet werden,
+- die zur Verfügung stehenden Resourcen möglichst vollständig ausgelastet
+  werden,
+- keine Prozesse "verhungern", also dauerhaft vernachlässigt werden.
+
+Nennen Sie drei Beispiele für Job Scheduler.
+- Process-Scheduling bei Betriebssystemen
+  (faire Verwaltung von mehreren Prozessen, die auf einem Computer ausgeführt
+  werden)
+- Festplatten-Scheduling
+  (zeitliche Verwaltung von Schreib- und Leseaufträgen des Betriebssystems)
+- Transaktions-Scheduling bei DBMS (verwaltet Schreib- und Lesezugriffe der
+  einzelnen Transaktionen, um Einhaltung der Datenkonsistenz zu garantieren)
+
+Welcher Job Scheduler wird auf dem Cluster verwendet?
+- Slurm (Simple Linux Utility for Resource Management)
+
+Machen Sie sich mit der Manpage von sbatch vertraut. Beschreiben Sie die
+Funktionsweise des Kommandos.
+- sbatch wird verwendet, um einen Job für die spätere Ausführung einzureihen.
+- als Eingabe übergibt man ein "Batch-Skript", eine von einem Interpreter
+  ausgeführte Textdatei, entweder als Datei oder über stdin von sbatch
+- mit "#SBATCH" lassen sich im Skript Anweisungen an slurm geben, zum Beispiel
+  auf wie vielen Kernen der Job laufen soll, auf welcher Partition u.s.w.
+
+Wie lassen sich die aktuellen Jobs und deren Status anzeigen?
+- squeue
+
+Gibt es eine Möglichkeit, einen bereits abgeschickten Job zu löschen (bevor
+oder während er läuft)?  Wenn ja, wie?
+- scancel $jobid
+
+Können auf dem Cluster mehrere Nutzer bzw. Jobs gleichzeitig denselben Knoten
+nutzen?
+- ja, das verwendete Knotenzuweisungsplugin (select/cons_tres) unterstützt es,
+  mehrere Jobs auf dem gleichen Knoten laufen zu lassen.
+
+Finden Sie heraus wie Sie sich den detaillierten Status eines Jobs ausgeben
+lassen können.
+- sstat -j $jobid
+
+Wie können Sie die Priorität Ihrer Jobs nachschauen? Können Sie diese
+verändern oder beeinflussen?
+- scontrol show jobid $jobid
+- die Priorität kann nur von Administratoren beeinflusst werden
+
+Welche Scheduling-Verfahren sind bei dem auf dem Cluster benutzten System
+möglich? Welches wird benutzt? Erläutern Sie jedes der Verfahren kurz.
+- Es gibt sched/backfill und sched/builtin. Verwendet wird sched/backfill. Bei
+  diesem Verfahren werden niederpriorisierte Jobs vor höherpriorisierten Jobs
+  gestartet, wenn dessen Startzeit dadurch nicht verzögert wird. So wird eine
+  höhere Auslastung als beim sched/builtin erreicht, da dieser sich strikt an
+  die Prioritäten hält.
+
+Welche unterschiedlichen Partitionen sind auf dem Cluster eingerichtet? Wie
+kann die zu benutzende Partition geändert werden?
+- matlab, gpu, vl-parcio, all
+
+Finden Sie heraus, wie Sie einen einzelnen Knoten allokieren können.
+Allokieren Sie einen konkreten Knoten (z. B. ant13), bauen Sie eine Verbindung
+zu diesem Knoten auf und führen sie hostname darauf aus.
+- salloc --nodelist "ant9" /bin/sh
+  salloc: Granted job allocation 178702
+- hostname
+  ants
+
+Wie hoch ist das Timeout auf dem Cluster, bis alle Knoten wieder freigegeben
+werden?
+- 6 Stunden
