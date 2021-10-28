@@ -9,5 +9,7 @@
 - Feedback vervollständigen (feedback.txt)
 ### Blatt 2
 - Status: Abgabe hochgeladen
+- https://github.com/birne420/parcio-2021g4/blob/main/blatt_2/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
 ### Blatt 1
 - Status: Abgabe hochgeladen
+- https://github.com/birne420/parcio-2021g4/blob/main/blatt_1/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
