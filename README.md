@@ -4,6 +4,7 @@
 - Aufgabe 1: ausstehend (timescript-antworten.txt)
 - Aufgabe 2: in Bearbeitung (timescript.sh, jobscript.sh, timescript-antworten.txt, timescript.out)
 - Aufgabe 3: ausstehend (pde-optimierung.txt, partdiff.c)
+- Feedback vervollständigen (feedback.txt)
 ### Blatt 2
 - Status: Abgabe hochgeladen
 ### Blatt 1
