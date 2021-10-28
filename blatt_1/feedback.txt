@@ -1,0 +1,23 @@
+Die Bearbeitungszeit bitte in ganzen Stunden angeben (aufrunden).
+In den restlichen Zeilen jeweils ein X in der zutreffenden Spalte setzen.
+
+Bearbeitungszeit:  
+Schwierigkeit:     [ ] zu leicht         [X] genau richtig     [ ] zu schwer
+Lehrreich:         [ ] wenig             [X] etwas             [ ] sehr
+Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [X] verständlich
+
+Kommentar:
+- Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen?
+Der Zeitaufwand war genau richtig.
+
+- Was war zu schwer oder unverständlich?
+---
+
+- Was könnten wir verbessern?
+Eventuell wäre eine kurze Einweisung in einen Kommandozeilen-Editor (z.B. vim) noch hilfreich,
+da solche Tools (zumindest zu Beginn) nicht sehr intuitiv sind, wenn man bisher nur mit grafischen
+Tools gearbeitet hat. Aber man kann sich eine Anleitung auch schnell im Internet heraussuchen, von
+daher kein großer Punkt.
+
+- Was hat Ihnen besonders gut gefallen?
+Die Einführung in das CLI war sehr gut und kleinschrittig, sodass alles sehr gut nachvollziehbar war.
