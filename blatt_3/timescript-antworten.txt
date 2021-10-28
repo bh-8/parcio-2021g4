@@ -1,8 +1,23 @@
 Führen Sie das Script mehrmals aus.
 Was fällt Ihnen auf?
 Versuchen Sie Ihre Beobachtung zu erklären!
-<TODO>
+- Bei 8 Ausführungen waren stets immer die gleichen Knoten involviert (ant13, ant14, ant15 und ant16)
+- Die Reihenfolge der Knoten variiert allerdings hin und wieder:
+  13,16,14,15; 13,15,14,16; 13,16,15,14; 13,15,16,14; 13,14,16,15; 13,14,15,16
+- Die Uhrzeiten der Ausführung unterscheiden sich:
+  ant15: zeigt immer "kleinste" Uhrzeit der Ausführung (-> Referenz)
+  ant16: immer +1-2 Sekunden nach ant15
+  ant14: immer +1-2 Sekunden nach ant15
+  ant13: immer +7-8 Sekunden nach ant15
+  --> Die Uhrzeiten auf den Knoten ist verschieden; Teilweise unterschieden sich die Zeiten um bis zu 8 Sekunden, obwohl die Ausführung bereits
+  nach 3 Sekunden beendet ist. Allerdings sind die Zeitabstände nicht immer komplett gleich (+- 1 Sekunde), da natürlich der JobScheduler die
+  Ausführung je nach Auslastungsstatus variiert.
 
 Könnte man die Datei timescript.out auch innerhalb des Scriptes timescript.sh erzeugen?
 Falls ja: Wie? Falls nein: Warum nicht?
-<TODO>
+- Man könnte timescript.sh 4x manuell queuen und die Ausgaben hinter jedem 'srun ./timescript.sh' mit dem >> Operator in die Output-Datei schreiben.
+  Allerdings ist diese Möglichkeit auf keinen Fall zu empfehlen, denn dadurch kann der JobScheduler die Tasks nicht optimal planen, außerdem
+  ist der Aufwand für diese Variante wesentlich größer, da man 'timescript.out' manuell vor der nächsten Ausführung löschen muss, wenn man
+  das gleiche Ergebnis haben möchte, da sonst aufgrund des >> Operators alle Ausgaben in die Datei angehängt werden und nicht nur die der letzten 4
+  Ausführungen. Außerdem wäre 'jobscript.sh' um einige Zeilen länger, da man 4x manuell queuen muss (entweder Schleife oder 4 einzelne Zeilen).
+  --> Es ist umständlicher, unschöner und weniger effizient, da man auch das gleiche Ergebnis mit den Slurm-Parametern (#SBATCH) und EINEM Befehl erzeugen kann!
