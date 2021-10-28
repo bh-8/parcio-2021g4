@@ -8,7 +8,6 @@
 #SBATCH --wait						# auf Beendigung aller Jobs warten
 
 srun ./timescript.sh
-
-#Done
 echo fertig>jobscript.out
+
 #EOF
