@@ -1,1 +1,8 @@
+Führen Sie das Script mehrmals aus.
+Was fällt Ihnen auf?
+Versuchen Sie Ihre Beobachtung zu erklären!
+<TODO>
+
+Könnte man die Datei timescript.out auch innerhalb des Scriptes timescript.sh erzeugen?
+Falls ja: Wie? Falls nein: Warum nicht?
 <TODO>
