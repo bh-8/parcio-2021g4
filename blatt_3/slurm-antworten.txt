@@ -1,3 +1,5 @@
-Wieso werden vier Threads allokiert, wenn Sie mit -c drei anfordern?
-Schreiben Sie dazu einige Sätze Begründung.
-<TODO>
+# Wieso werden vier Threads allokiert, wenn Sie mit -c drei anfordern?
+Es werden vier Threads allokiert, da pro Kern höchstens ein Job laufen darf
+und bei einer Anforderung von drei Threads ein Thread überbleibt (die CPUs
+der Nodes haben zwei Threads pro Kern). Mit `--threads-per-core=1` oder
+`--hint=nomultithread` kann man drei Kerne ohne SMT anfordern.
