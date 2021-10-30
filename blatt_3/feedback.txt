@@ -1,20 +1,24 @@
 Die Bearbeitungszeit bitte in ganzen Stunden angeben (aufrunden).
 In den restlichen Zeilen jeweils ein X in der zutreffenden Spalte setzen.
 
-Bearbeitungszeit:  
+Bearbeitungszeit: 5
 Schwierigkeit:     [ ] zu leicht         [X] genau richtig     [ ] zu schwer
 Lehrreich:         [ ] wenig             [ ] etwas             [X] sehr
 Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [X] verständlich
 
 Kommentar:
-Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen?
-<TODO>
+Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen
+Der Umfang der Aufgaben war angemessen, einige Benchmarks haben sich allerdings
+in die Länge gezogen, was aber nicht direkt an der Aufgabe lag. Des Weiteren
+haben wir keinen schlüssigen Weg gefunden, die fehlerhaften
+Speicherzugriffsmuster per Profiling herauszufinden.
 
 Was war zu schwer oder unverständlich?
-<TODO>
+Das Wissen über die Mathematik hinter dem partdiff-Programm hat uns (noch)
+nicht beim Optimieren des Programms geholfen.
 
 Was könnten wir verbessern?
-<TODO>
+Wie schon erwähnt wäre ein Weg, die Speicherzugriffe zu profilen interessant.
 
 Was hat Ihnen besonders gut gefallen?
-<TODO>
+Das ausprobieren bzw. entdecken zahlreicher Compiler-Flags war lehrreich.
