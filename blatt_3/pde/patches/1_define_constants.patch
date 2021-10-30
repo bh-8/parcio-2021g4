@@ -1,0 +1,19 @@
+--- a/partdiff.c	2021-10-30 16:35:38.700224118 +0200
++++ b/partdiff.c	2021-10-30 16:40:55.034705791 +0200
+@@ -40,6 +40,7 @@
+ 
+ #ifndef M_PI
+ #define M_PI 3.14159265358979323846
++#define TWO_PI_SQUARED 19.73920880217871723763
+ #endif
+ 
+ #define MAX_INTERLINES    10240
+@@ -348,7 +349,7 @@
+ 				if (options->inf_func == FUNC_FPISIN)
+ 			        {
+ 					double const h = arguments->h;
+-			                star += (2 * M_PI * M_PI) * h * h * sin(M_PI * h * (double)i) * sin(M_PI * h * (double)j);
++			                star += TWO_PI_SQUARED * h * h * sin(M_PI * h * (double)i) * sin(M_PI * h * (double)j);
+ 			        }
+ 
+ 				star /= 4;

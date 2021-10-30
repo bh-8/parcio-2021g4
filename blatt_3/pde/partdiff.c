@@ -289,7 +289,7 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 /* ************************************************************************ */
 /* calculate_func: calculates the interference function                     */
 /* ************************************************************************ */
-double
+static inline double
 calculate_func(struct calculation_arguments const* arguments, struct options const* options, int i, int j)
 {
 	double const h = arguments->h;
@@ -335,16 +335,14 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		m1 = 0;
 		m2 = 0;
 	}
-
 	while (term_iteration > 0)
 	{
 		maxresiduum = 0;
-
-		/* over all columns */
-		for (j = 1; j < N; j++)
+		/* over all rows */
+		for (i = 1; i < N; i++)
 		{
-			/* over all rows */
-			for (i = 1; i < N; i++)
+			/* over all columns */
+			for (j = 1; j < N; j++)
 			{
 				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
 

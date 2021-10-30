@@ -1,0 +1,11 @@
+--- a/partdiff.c	2021-10-30 16:42:32.943475406 +0200
++++ b/partdiff.c	2021-10-30 16:45:43.631975723 +0200
+@@ -352,7 +352,7 @@
+ 			                star += TWO_PI_SQUARED * h * h * sin(M_PI * h * (double)i) * sin(M_PI * h * (double)j);
+ 			        }
+ 
+-				star /= 4;
++				star *= 0.25;
+ 
+ 				residuum    = Matrix[m2][i][j] - star;
+ 				residuum    = fabs(residuum);
