@@ -849,3 +849,8 @@ Wir haben versucht, den Code noch weiter abzuändern, z.B. 2*Pi^2 als Konstante
 zu definieren oder /4 in *0.25 umzuwandeln, allerdings haben diese Änderungen
 keinen offensichtlichen Unterschied bei dem höchsten Optimierungslevel gemacht.
 Die Änderungen sind als Patch in `pde/patches` enthalten.
+
+# Noch mehr Benchmarks?
+Mit `benchmark.sh` wird eine große Menge Kombination von Compiler-Flags
+ausprobiert. Die Ergebnisse von `srun ./benchmark.sh` waren zum jetzigen
+Zeitpunkt noch nicht verfügbar.
