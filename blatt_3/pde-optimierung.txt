@@ -852,5 +852,46 @@ Die Änderungen sind als Patch in `pde/patches` enthalten.
 
 # Noch mehr Benchmarks?
 Mit `benchmark.sh` wird eine große Menge Kombination von Compiler-Flags
-ausprobiert. Die Ergebnisse von `srun ./benchmark.sh` waren zum jetzigen
-Zeitpunkt noch nicht verfügbar.
+ausprobiert. Hier die Ergebnisse für die erste Variante:
+
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `-O0` | 39.767 ± 0.052 | 39.728 | 39.910 | 42.97 ± 0.36 |
+| `-O1` | 7.801 ± 0.017 | 7.779 | 7.831 | 8.43 ± 0.07 |
+| `-O2` | 2.826 ± 0.027 | 2.791 | 2.857 | 3.05 ± 0.04 |
+| `-O3` | 2.480 ± 0.014 | 2.459 | 2.495 | 2.68 ± 0.03 |
+| `-Og` | 8.860 ± 0.006 | 8.850 | 8.869 | 9.57 ± 0.08 |
+| `-Os` | 7.866 ± 0.015 | 7.843 | 7.882 | 8.50 ± 0.07 |
+| `-O2 -march=native` | 2.839 ± 0.017 | 2.801 | 2.854 | 3.07 ± 0.03 |
+| `-O3 -march=native` | 2.504 ± 0.010 | 2.477 | 2.511 | 2.71 ± 0.02 |
+| `-Ofast -march=native` | 0.929 ± 0.005 | 0.916 | 0.934 | 1.00 ± 0.01 |
+| `-Os -march=native` | 7.623 ± 0.012 | 7.608 | 7.649 | 8.24 ± 0.07 |
+| `-O2 -march=native -flto` | 2.833 ± 0.021 | 2.798 | 2.851 | 3.06 ± 0.03 |
+| `-O3 -march=native -flto` | 2.499 ± 0.007 | 2.486 | 2.506 | 2.70 ± 0.02 |
+| `-Ofast -march=native -flto` | 0.925 ± 0.008 | 0.906 | 0.932 | 1.00 |
+| `-Os -march=native -flto` | 7.629 ± 0.014 | 7.603 | 7.646 | 8.24 ± 0.07 |
+| `-O0 + strip` | 39.746 ± 0.009 | 39.733 | 39.764 | 42.95 ± 0.35 |
+| `-O1 + strip` | 7.802 ± 0.018 | 7.775 | 7.822 | 8.43 ± 0.07 |
+| `-O2 + strip` | 2.834 ± 0.021 | 2.791 | 2.851 | 3.06 ± 0.03 |
+| `-O3 + strip` | 2.471 ± 0.015 | 2.448 | 2.486 | 2.67 ± 0.03 |
+| `-Og + strip` | 8.858 ± 0.009 | 8.848 | 8.874 | 9.57 ± 0.08 |
+| `-Os + strip` | 7.861 ± 0.012 | 7.844 | 7.879 | 8.49 ± 0.07 |
+| `-O2 -march=native + strip` | 2.826 ± 0.019 | 2.797 | 2.848 | 3.05 ± 0.03 |
+| `-O3 -march=native + strip` | 2.497 ± 0.015 | 2.461 | 2.507 | 2.70 ± 0.03 |
+| `-Ofast -march=native + strip` | 0.929 ± 0.003 | 0.925 | 0.935 | 1.00 ± 0.01 |
+| `-Os -march=native + strip` | 7.624 ± 0.012 | 7.604 | 7.641 | 8.24 ± 0.07 |
+| `-O2 -march=native -flto + strip` | 2.830 ± 0.020 | 2.787 | 2.851 | 3.06 ± 0.03 |
+| `-O3 -march=native -flto + strip` | 2.502 ± 0.007 | 2.492 | 2.510 | 2.70 ± 0.02 |
+| `-Ofast -march=native -flto + strip` | 0.926 ± 0.007 | 0.909 | 0.933 | 1.00 ± 0.01 |
+| `-Os -march=native -flto + strip` | 7.637 ± 0.015 | 7.606 | 7.663 | 8.25 ± 0.07 |
+| `-O2 -march=native -flto + PGO` | 2.608 ± 0.010 | 2.599 | 2.625 | 2.82 ± 0.03 |
+| `-O3 -march=native -flto + PGO` | 2.613 ± 0.020 | 2.578 | 2.641 | 2.82 ± 0.03 |
+| `-Ofast -march=native -flto + PGO` | 0.929 ± 0.010 | 0.903 | 0.938 | 1.00 ± 0.01 |
+| `-Os -march=native -flto + PGO` | 7.629 ± 0.017 | 7.607 | 7.649 | 8.24 ± 0.07 |
+| `-O2 -march=native -flto + PGO + strip` | 2.606 ± 0.014 | 2.578 | 2.623 | 2.82 ± 0.03 |
+| `-O3 -march=native -flto + PGO + strip` | 2.617 ± 0.010 | 2.604 | 2.638 | 2.83 ± 0.03 |
+| `-Ofast -march=native -flto + PGO + strip` | 0.928 ± 0.007 | 0.912 | 0.936 | 1.00 ± 0.01 |
+| `-Os -march=native -flto + PGO + strip` | 7.633 ± 0.014 | 7.604 | 7.651 | 8.25 ± 0.07 |
+
+Die Ergebnisse für die zweite Variante waren zum Zeitpunkt der Verfassung noch
+nicht verfügbar.
