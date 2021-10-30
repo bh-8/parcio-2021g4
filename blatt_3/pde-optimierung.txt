@@ -52,9 +52,9 @@ Matrix:
 ```
 
 # Compiler Flags
-Im nachfolgenden haben wir zunächst alle erdenklichen Compiler-Flags
-verwendet, um das Programm ohne Veränderung des Quellcodes zu beschleunigen.
-Die verwendeten Kommandos zum kompilieren sind angegeben und werden im
+Im nachfolgenden haben wir zunächst alle erdenklichen Compiler-Flags verwendet,
+um das Programm ohne Veränderung des Quellcodes zu beschleunigen.  Die
+verwendeten Kommandos zum kompilieren sind angegeben und werden im
 `pde`-Verzeichnis des aktuellen Übungsblattes ausgeführt.
 
 ## -O2
@@ -613,7 +613,13 @@ Index by function name
    [2] calculate (partdiff.c)  [4] freeMatrices (partdiff.c)
 ```
 
-In der Ausgabe von `gprof` sieht man, dass ein Großteil der Zeit in der `calculate`-Funktion verbracht wird. Des Weiteren wird die `calculate_func`-Funktion sehr oft aufgerufen. Auf den höheren Optimierungsstufen wird `calculate_func` höchstwahrscheinlich automatisch geinlined, allerdings ist die Funktion relative kurz und hat nur einen Branch, also sagen wir dem Compiler, dass er die Funktion doch bitte inlinen soll mit `static inline`.
+In der Ausgabe von `gprof` sieht man, dass ein Großteil der Zeit in der
+`calculate`-Funktion verbracht wird. Des Weiteren wird die
+`calculate_func`-Funktion sehr oft aufgerufen. Auf den höheren
+Optimierungsstufen wird `calculate_func` höchstwahrscheinlich automatisch
+geinlined, allerdings ist die Funktion relative kurz und hat nur einen Branch,
+also sagen wir dem Compiler, dass er die Funktion doch bitte inlinen soll mit
+`static inline`.
 
 Das ergibt dann folgenden diff:
 ```
@@ -657,7 +663,9 @@ Each sample counts as 0.01 seconds.
   0.00     14.80     0.00        1     0.00     0.00  initVariables
 ```
 
-Das hat uns, wie erwartet, etwas näher an die höheren Compiler-Flags herangebracht. Wir wissen jetzt auch, dass das Problem definitiv in `calculate` ist, allerdings nicht wo genau. Vielleich kann uns ja `perf` helfen?
+Das hat uns, wie erwartet, etwas näher an die höheren Compiler-Flags
+herangebracht. Wir wissen jetzt auch, dass das Problem definitiv in `calculate`
+ist, allerdings nicht wo genau. Vielleich kann uns ja `perf` helfen?
 
 ```
 % perf stat ./partdiff 1 2 64 1 2 10240
@@ -701,9 +709,15 @@ Matrix:
 perf stat ./partdiff 1 2 64 1 2 10240  15.16s user 0.01s system 99% cpu 15.224 total
 ```
 
-Hier sehen wir sofort, dass das Programm nur einen Prozessorkern auslastet: `15,187.31 msec task-clock:u # 1.000 CPUs`. Das ist jetzt aber nicht so einfach zu beheben, also schauen wir weiter. Wir haben keine context-switches oder migrations, daran kann es also nicht liegen. Die branch-misses sind auch in einem akzeptablen Rahmen.
+Hier sehen wir sofort, dass das Programm nur einen Prozessorkern auslastet:
+`15,187.31 msec task-clock:u # 1.000 CPUs`. Das ist jetzt aber nicht so einfach
+zu beheben, also schauen wir weiter. Wir haben keine context-switches oder
+migrations, daran kann es also nicht liegen. Die branch-misses sind auch in
+einem akzeptablen Rahmen.
 
-Auf dem Aufgabenblatt wird erwähnt dass es wahrscheinlich Speicherzugriffsprobleme gibt, und ein Blick in `calculate` zeigt, dass durch die Matrix M in column-major order iteriert wird:
+Auf dem Aufgabenblatt wird erwähnt dass es wahrscheinlich
+Speicherzugriffsprobleme gibt, und ein Blick in `calculate` zeigt, dass durch
+die Matrix M in column-major order iteriert wird:
 ```
 /* over all columns */
                 for (j = 1; j < N; j++)
@@ -712,7 +726,11 @@ Auf dem Aufgabenblatt wird erwähnt dass es wahrscheinlich Speicherzugriffsprobl
                         for (i = 1; i < N; i++)
                         {
 ```
-In C wird eine Matrix in row-major order im Arbeitsspeicher hinterlegt. Über so eine Matrix in column-major order zu iterieren, bedeutet dass die Speicherzugriffe nicht strikt inkrementell, sondern mit großen Sprüngen und Lücken erfolgen. Das führt dann zu zahlreichen cache-misses. Beheben wir also das Problem:
+In C wird eine Matrix in row-major order im Arbeitsspeicher hinterlegt. Über so
+eine Matrix in column-major order zu iterieren, bedeutet dass die
+Speicherzugriffe nicht strikt inkrementell, sondern mit großen Sprüngen und
+Lücken erfolgen. Das führt dann zu zahlreichen cache-misses. Beheben wir also
+das Problem:
 
 ```
 --- a/partdiff.c
@@ -793,11 +811,14 @@ Matrix:
 ./partdiff 1 2 64 2 2 5120  3.04s user 0.00s system 99% cpu 3.052 total
 ```
 
-Wir erreichen einen Speedup von ~30 für die erste Variante und ~16,3 für die zweite.
+Wir erreichen einen Speedup von ~30 für die erste Variante und ~16,3 für die
+zweite.
 
 # Mehr Benchmarks (auf dem Cluster)
 
-Mit Hilfe von `hyperfine` kann man Benchmarks durchführen. Mit folgendem Kommando haben wir auf einer Node des Clusters den Ausgangszustand und die optimierte Variante verglichen:
+Mit Hilfe von `hyperfine` kann man Benchmarks durchführen. Mit folgendem
+Kommando haben wir auf einer Node des Clusters den Ausgangszustand und die
+optimierte Variante verglichen:
 ```
 % srun hyperfine -w=1 --export-markdown='run1.md' -n 'Ausgangszustand' -p "make clean && make" "./partdiff 1 2 64 1 2 10240" -n 'Optimiert' -p "./build.sh" "./partdiff_new 1 2 64 1 2 10240"
 ```
@@ -820,7 +841,11 @@ Und für Variante 2:
 
 
 Es wurde das Makefile im Ausgangszustand verwendet.
-`build.sh` ist in der Abgabe enthalten, allerdings in einer Version ohne den Suffix '_new'.
+`build.sh` ist in der Abgabe enthalten, allerdings in einer Version ohne den
+Suffix '_new'.
 
 # Mehr Änderungen?
-Wir haben versucht, den Code noch weiter abzuändern, z.B. 2*Pi^2 als Konstante zu definieren oder /4 in *0.25 umzuwandeln, allerdings haben diese Änderungen keinen offensichtlichen Unterschied bei dem höchsten Optimierungslevel gemacht. Die Änderungen sind als Patch in `pde/patches` enthalten.
+Wir haben versucht, den Code noch weiter abzuändern, z.B. 2*Pi^2 als Konstante
+zu definieren oder /4 in *0.25 umzuwandeln, allerdings haben diese Änderungen
+keinen offensichtlichen Unterschied bei dem höchsten Optimierungslevel gemacht.
+Die Änderungen sind als Patch in `pde/patches` enthalten.
