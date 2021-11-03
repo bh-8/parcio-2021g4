@@ -18,8 +18,15 @@
     + <TODO...>
 
 ---
-### Teilaufgabe 3: Parallelisierungsschema für das Gauß-Seidel-Verfahren (siehe Jacobi).
-- <Schema hier einfügen>
+### Teilaufgabe 3: Parallelisierungsschema für das Gauß-Seidel-Verfahren.
+- Beschreiben Sie aus Sicht eines Tasks, wann die Berechnung und wann die Kommunikation mit seinen Nachbarn erfolgt. Unterscheiden Sie nach gemeinsamem und verteiltem Speicher.
+    + <TODO...>
+
+- Welche Daten benötigt der Task von seinen Nachbarn und wann tauscht er die Daten aus?
+    + <TODO...>
+
+- Auf welche Variablen bzw. Daten muss welcher Task zugreifen?
+    + <TODO...>
 
 ---
 ### Teilaufgabe 4: Diskussion der Abbruchproblematik
