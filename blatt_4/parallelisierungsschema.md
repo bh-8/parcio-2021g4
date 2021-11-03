@@ -17,7 +17,8 @@
     ...
 
 ### Teilaufgabe 3: Parallelisierungsschema für das Gauß-Seidel-Verfahren (siehe Jacobi).
-    ...
+- ...
+  + test
 
 ### Teilaufgabe 4: Diskussion der Abbruchproblematik
 - Es sind vier Fälle zu betrachten: Abbruch nach Iterationszahl und Genauigkeit für jeweils Jacobi und Gauß-Seidel.
