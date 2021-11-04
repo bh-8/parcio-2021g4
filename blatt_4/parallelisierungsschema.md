@@ -4,7 +4,7 @@
     + <TODO...>
 
 - Visualisieren Sie die Datenaufteilung mit geeigneten Grafiken.
-    + <TODO...>
+    + ![Datenaufteilung](pdf_attachment/aufteilung.png)
 
 ---
 ### Teilaufgabe 2: Parallelisierungsschema für das Jacobi-Verfahren.
