@@ -4,7 +4,6 @@
     + <TODO...>
 
 - Visualisieren Sie die Datenaufteilung mit geeigneten Grafiken.
-    ![Datenaufteilung](pdf_attachment/aufteilung.png)
     <img src="pdf_attachment/aufteilung.png" alt="Datenaufteilung" width="288" height="193">
 
 ---
