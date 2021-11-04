@@ -1,7 +1,7 @@
 # Parallelisierungsschema
 ### Teilaufgabe 1: Beschreibung der Datenaufteilung der Matrix auf die einzelnen Tasks.
 - Welche Daten der Matrix werden von welchem Task verwaltet?
-    + <TODO...>
+    + die Threads (Tasks) arbeiten zeilenweise auf der Matrix
 
 - Visualisieren Sie die Datenaufteilung mit geeigneten Grafiken.
     <br/><img src="pdf_attachment/aufteilung.png" alt="Datenaufteilung" width="288" height="193">
