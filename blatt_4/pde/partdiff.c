@@ -78,6 +78,16 @@ struct options
 	double   term_precision; /* terminate if precision reached */
 };
 
+struct vector
+{
+	size_t** buf;
+	size_t size;
+	size_t max_size;
+};
+
+static void push(struct vector*, void*);
+static void* pop(struct vector*);
+
 /* ************************************************************************ */
 /* Global variables                                                         */
 /* ************************************************************************ */
@@ -85,6 +95,7 @@ struct options
 /* time measurement variables */
 struct timeval start_time; /* time when program started */
 struct timeval comp_time;  /* time when calculation completed */
+struct vector allocated_memory;
 
 static void
 usage(char* name)
@@ -203,12 +214,13 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 }
 
 /* ************************************************************************ */
-/* freeMatrices: frees memory for matrices                                  */
+/* cleanup: frees all allocated memory                                      */
 /* ************************************************************************ */
-static void
-freeMatrices(struct calculation_arguments* arguments)
-{
-	free(arguments->M);
+static inline void
+cleanup() {
+	for (void* p = pop(&allocated_memory); p != NULL; p = pop(&allocated_memory))
+		free(p);
+	free(allocated_memory.buf);
 }
 
 /* ************************************************************************ */
@@ -223,10 +235,56 @@ allocateMemory(size_t size)
 	if ((p = malloc(size)) == NULL)
 	{
 		printf("Speicherprobleme! (%" PRIu64 " Bytes angefordert)\n", size);
+		cleanup();
 		exit(1);
 	}
 
+	push(&allocated_memory, p);
+
 	return p;
+}
+
+/* ************************************************************************ */
+/* push: push a pointer into the vector                                     */
+/* ************************************************************************ */
+
+static void
+push(struct vector* vec, void* data)
+{
+	if (vec->max_size == 0)
+	{
+		if ((vec->buf = malloc(sizeof(size_t*) << 3)) == NULL)
+		{
+			cleanup();
+			exit(1);
+		}
+	}
+	else if (vec->max_size == vec->size)
+	{
+		size_t** newbuf = malloc((vec->size) + (vec->size >> 1));
+		if (newbuf == NULL)
+		{
+			cleanup();
+			exit(1);
+		}
+		memcpy(newbuf, vec->buf, vec->size++);
+		free(vec->buf);
+		vec->buf = newbuf;
+	}
+	vec->buf[vec->size++] = (size_t*) data;
+
+}
+
+/* ************************************************************************ */
+/* pop: pop a pointer from the vector, return NULL if empty                 */
+/* ************************************************************************ */
+
+static void*
+pop(struct vector* vec)
+{
+	if (vec->size == 0)
+		return NULL;
+	return (void*) vec->buf[vec->size--];
 }
 
 /* ************************************************************************ */
@@ -502,7 +560,7 @@ main(int argc, char** argv)
 	displayStatistics(&arguments, &results, &options);
 	displayMatrix(&arguments, &results, &options);
 
-	freeMatrices(&arguments);
+	cleanup();
 
 	return 0;
 }
