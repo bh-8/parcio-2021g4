@@ -290,7 +290,9 @@ pop()
 {
 	if (allocated_memory.size == 0)
 		return NULL;
-	return (void*) allocated_memory.buf[--(allocated_memory.size)];
+	void* p = allocated_memory.buf[--(allocated_memory.size)];
+	allocated_memory.buf[allocated_memory.size] = NULL;
+	return p;
 }
 
 /* ************************************************************************ */
