@@ -85,8 +85,8 @@ struct vector
 	size_t max_size;
 };
 
-static void push(struct vector*, void*);
-static void* pop(struct vector*);
+static void push(void*);
+static void* pop();
 
 /* ************************************************************************ */
 /* Global variables                                                         */
@@ -218,7 +218,7 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 /* ************************************************************************ */
 static inline void
 cleanup() {
-	for (void* p = pop(&allocated_memory); p != NULL; p = pop(&allocated_memory))
+	for (void* p = pop(); p != NULL; p = pop())
 		free(p);
 	free(allocated_memory.buf);
 }
@@ -239,7 +239,7 @@ allocateMemory(size_t size)
 		exit(1);
 	}
 
-	push(&allocated_memory, p);
+	push(p);
 
 	return p;
 }
@@ -249,29 +249,35 @@ allocateMemory(size_t size)
 /* ************************************************************************ */
 
 static void
-push(struct vector* vec, void* data)
+push(void* data)
 {
-	if (vec->max_size == 0)
+	if (allocated_memory.max_size == 0)
 	{
-		if ((vec->buf = malloc(sizeof(size_t*) << 3)) == NULL)
+		if ((allocated_memory.buf = malloc(sizeof(size_t*) << 3)) ==
+				NULL)
 		{
 			cleanup();
 			exit(1);
 		}
+		allocated_memory.max_size = 8;
 	}
-	else if (vec->max_size == vec->size)
+	else if (allocated_memory.max_size == allocated_memory.size)
 	{
-		size_t** newbuf = malloc((vec->size) + (vec->size >> 1));
+		size_t** newbuf = malloc(sizeof(size_t*) *
+				((allocated_memory.size) +
+				 (allocated_memory.size >> 1)));
 		if (newbuf == NULL)
 		{
 			cleanup();
 			exit(1);
 		}
-		memcpy(newbuf, vec->buf, vec->size++);
-		free(vec->buf);
-		vec->buf = newbuf;
+		memcpy(newbuf, allocated_memory.buf, allocated_memory.size);
+		free(allocated_memory.buf);
+		allocated_memory.buf = newbuf;
+		allocated_memory.max_size = (allocated_memory.size) +
+			(allocated_memory.size >> 1);
 	}
-	vec->buf[vec->size++] = (size_t*) data;
+	allocated_memory.buf[allocated_memory.size++] = (size_t*) data;
 
 }
 
@@ -280,11 +286,11 @@ push(struct vector* vec, void* data)
 /* ************************************************************************ */
 
 static void*
-pop(struct vector* vec)
+pop()
 {
-	if (vec->size == 0)
+	if (allocated_memory.size == 0)
 		return NULL;
-	return (void*) vec->buf[vec->size--];
+	return (void*) allocated_memory.buf[--(allocated_memory.size)];
 }
 
 /* ************************************************************************ */
