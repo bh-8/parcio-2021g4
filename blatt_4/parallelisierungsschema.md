@@ -31,12 +31,12 @@
 ---
 ### Teilaufgabe 4: Diskussion der Abbruchproblematik
 - Es sind vier Fälle zu betrachten: Abbruch nach Iterationszahl und Genauigkeit für jeweils Jacobi und Gauß-Seidel.
-    + <TODO...>
-
 - Wann wird ein Task feststellen, dass das Abbruchkriterium erreicht wurde und er seine Arbeit beenden kann?
-    + <TODO...>
-
+    + Abbruch nach Iterationszahl:
+      + Die Iterationen werden auf die verschiedenen Threads gleichmäßig verteilt (Iterationen/Threadanzahl). Das Programm terminiert, sobald jeder Thread seine zugewiesene Anzahl Iterationen abgearbeitet hat.
+    + Abbruch nach Genauigkeit:
+      + Die Threads teilen sich die 'residuum'-Variable und terminieren, sobald dieser Restfehler unter einem bestimmten Threshold liegt.
 - In welcher Iteration beendet sich ein Task im Vergleich zu seinen Nachbarn, wenn er das Abbruchkriterium erreicht?
-    + <TODO...>
+    + Da die Nachbartasks des terminierenden Tasks von den berechneten Werten abhängen, müssen diese angrenzenden Tasks eine Iteration weiter rechnen, um mit den finalen Werden des terminierten Tasks arbeiten zu können.
 
 ---
