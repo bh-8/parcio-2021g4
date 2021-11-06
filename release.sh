@@ -8,7 +8,7 @@ if !(test -f "${FOLDER}/../gruppe.txt"); then
 	echo "Please create gruppe.txt"
 	exit 2
 fi
-if !(test -d "${FOLDER}/_abgabe"); then
+if test -d "${FOLDER}/_abgabe"; then
 	rm -r "${FOLDER}/_abgabe"
 fi
 cd "${FOLDER}/.."
