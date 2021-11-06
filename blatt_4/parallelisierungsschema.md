@@ -37,6 +37,6 @@
     + Abbruch nach Genauigkeit:
       + Die Threads teilen sich die 'residuum'-Variable und terminieren, sobald dieser Restfehler unter einem bestimmten Threshold liegt.
 - In welcher Iteration beendet sich ein Task im Vergleich zu seinen Nachbarn, wenn er das Abbruchkriterium erreicht?
-    + Da die Nachbartasks des terminierenden Tasks von den berechneten Werten abhängen, müssen diese angrenzenden Tasks eine Iteration weiter rechnen, um mit den finalen Werden des terminierten Tasks arbeiten zu können.
+    + Da die Nachbartasks des terminierenden Tasks von den von ihm berechneten Werten abhängen, müssen diese angrenzenden Tasks eine Iteration weiter rechnen, um mit den finalen Werden des terminierten Tasks arbeiten zu können.
 
 ---
