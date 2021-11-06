@@ -2,12 +2,20 @@ Die Bearbeitungszeit bitte in ganzen Stunden angeben (aufrunden).
 In den restlichen Zeilen jeweils ein X in der zutreffenden Spalte setzen.
 
 Bearbeitungszeit:  
-Schwierigkeit:     [ ] zu leicht         [ ] genau richtig     [ ] zu schwer
-Lehrreich:         [ ] wenig             [ ] etwas             [ ] sehr
-Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [ ] verständlich
+Schwierigkeit:     [ ] zu leicht         [X] genau richtig     [ ] zu schwer
+Lehrreich:         [ ] wenig             [ ] etwas             [X] sehr
+Verständlichkeit:  [ ] großteils unklar  [X] teilweise unklar  [ ] verständlich
 
 Kommentar:
 Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen?
+Der Zeitaufwand war angemessen.
+
 Was war zu schwer oder unverständlich?
+Einige Fragen schienen sich thematisch zu überschneiden.
+
 Was könnten wir verbessern?
+siehe Vorherige
+
 Was hat Ihnen besonders gut gefallen?
+Die Auseinandersetzung mit der Parallelisierbarkeit des Problems hat uns ein
+deutlich besseres Verständnis des Codes gegeben.
