@@ -4,14 +4,14 @@
 ### Blatt 5
 - Warten auf Blatt...
 ### Blatt 4
-- Übungsblatt: https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_04_Parallelisierungsschema-p-266.pdf
+- Übungsblatt: [PP_2021_Uebung_04_Parallelisierungsschema-p-266.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_04_Parallelisierungsschema-p-266.pdf)
 - Abgabe: https://github.com/birne420/parcio-2021g4/blob/main/blatt_4/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
 ### Blatt 3
-- Übungsblatt: https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_03_Leistungsoptimierung-p-260.pdf
+- Übungsblatt: [PP_2021_Uebung_03_Leistungsoptimierung-p-260.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_03_Leistungsoptimierung-p-260.pdf)
 - Abgabe: https://github.com/birne420/parcio-2021g4/blob/main/blatt_3/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
 ### Blatt 2
-- Übungsblatt: https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_02_Debugging-p-248.pdf
+- Übungsblatt: [PP_2021_Uebung_02_Debugging-p-248.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_02_Debugging-p-248.pdf)
 - Abgabe: https://github.com/birne420/parcio-2021g4/blob/main/blatt_2/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
 ### Blatt 1
-- Übungsblatt: https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_01_Einfuehrung-p-240.pdf
+- Übungsblatt: [PP_2021_Uebung_01_Einfuehrung-p-240.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_01_Einfuehrung-p-240.pdf)
 - Abgabe: https://github.com/birne420/parcio-2021g4/blob/main/blatt_1/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
