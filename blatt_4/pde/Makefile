@@ -1,4 +1,4 @@
-CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -O3 -g
+CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Ofast -fopenmp
 LDFLAGS = $(CFLAGS)
 LDLIBS  = -lm
 

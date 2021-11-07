@@ -322,6 +322,7 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 	matrix Matrix = (matrix)arguments->M;
 
 	/* initialize matrix/matrices with zeros */
+	#pragma omp parallel for collapse(2) private(g,i,j)
 	for (g = 0; g < arguments->num_matrices; g++)
 	{
 		for (i = 0; i <= N; i++)
@@ -336,6 +337,7 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 	/* initialize borders, depending on function (function 2: nothing to do) */
 	if (options->inf_func == FUNC_F0)
 	{
+		#pragma omp parallel for private(g,i,j)
 		for (g = 0; g < arguments->num_matrices; g++)
 		{
 			for (i = 0; i <= N; i++)
@@ -393,12 +395,12 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		pih    = M_PI * h;
 		fpisin = 0.25 * (2 * M_PI * M_PI) * h * h;
 	}
-
+	#pragma omp parallel private(i,j,star,residuum)
 	while (term_iteration > 0)
 	{
 		maxresiduum = 0;
-
 		/* over all rows */
+		#pragma omp for reduction(max:maxresiduum)
 		for (i = 1; i < N; i++)
 		{
 			double fpisin_i = 0.0;
@@ -428,26 +430,31 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 				Matrix[m1][i][j] = star;
 			}
 		}
-
-		results->stat_iteration++;
-		results->stat_precision = maxresiduum;
-
-		/* exchange m1 and m2 */
-		i  = m1;
-		m1 = m2;
-		m2 = i;
-
-		/* check for stopping calculation depending on termination method */
-		if (options->termination == TERM_PREC)
+		#pragma omp barrier
 		{
-			if (maxresiduum < options->term_precision)
-			{
-				term_iteration = 0;
-			}
 		}
-		else if (options->termination == TERM_ITER)
+		#pragma omp single
 		{
-			term_iteration--;
+			results->stat_iteration++;
+			results->stat_precision = maxresiduum;
+
+			/* exchange m1 and m2 */
+			i  = m1;
+			m1 = m2;
+			m2 = i;
+
+			/* check for stopping calculation depending on termination method */
+			if (options->termination == TERM_PREC)
+			{
+				if (maxresiduum < options->term_precision)
+				{
+					term_iteration = 0;
+				}
+			}
+			else if (options->termination == TERM_ITER)
+			{
+				term_iteration--;
+			}
 		}
 	}
 
