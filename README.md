@@ -15,5 +15,6 @@
 ### Blatt 1
 - Status: Abgabe hochgeladen
 - Übungsblatt: <a href="https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_01_Einfuehrung-p-240.pdf" target="_blank">Hello, world!</a>
+- [link](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_01_Einfuehrung-p-240.pdf){:target="_blank"}
 - Übungsblatt: https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_01_Einfuehrung-p-240.pdf
 - Abgabe: https://github.com/birne420/parcio-2021g4/blob/main/blatt_1/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true
