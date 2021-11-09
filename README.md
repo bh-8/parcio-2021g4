@@ -3,7 +3,11 @@
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
 ### Blatt 5
-- Warten auf Blatt...
+- Übungsblatt: [PP_2021_Uebung_05_OpenMP-p-274.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_05_OpenMP-p-274.pdf)
+- 1. Parallelisierung mit OpenMP (180P)
+- 2. Umsetzung der Datenaufteilungen (60P)
+- 3. Vergleich Scheduling-Algorithmen (60P)
+- 4. Leistungsanalyse (180P)
 ### Blatt 4
 - Übungsblatt: [PP_2021_Uebung_04_Parallelisierungsschema-p-266.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_04_Parallelisierungsschema-p-266.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_4/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
