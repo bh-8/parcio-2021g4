@@ -372,77 +372,79 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	double pih    = 0.0;
 	double fpisin = 0.0;
 
-	int term_iteration = options->term_iteration;
-
 	typedef double(*matrix)[N + 1][N + 1];
 
 	matrix Matrix = (matrix)arguments->M;
-
-	/* initialize m1 and m2 depending on algorithm */
-	if (options->method == METH_JACOBI)
-	{
-		m1 = 0;
-		m2 = 1;
-	}
-	else
-	{
-		m1 = 0;
-		m2 = 0;
-	}
 
 	if (options->inf_func == FUNC_FPISIN)
 	{
 		pih    = M_PI * h;
 		fpisin = 0.25 * (2 * M_PI * M_PI) * h * h;
 	}
-	#pragma omp parallel private(i,j,star,residuum)
-	while (term_iteration > 0)
+
+	uint64_t stat_iteration = 0;
+	double stat_precision = 0.0;
+	uint64_t term_iteration;
+
+	#pragma omp parallel private(i,j,m1,m2,star,residuum,term_iteration) reduction(+:stat_iteration) reduction(max:stat_precision)
 	{
-		maxresiduum = 0;
-		/* over all rows */
-		#pragma omp for reduction(max:maxresiduum)
-		for (i = 1; i < N; i++)
+		/* initialize m1 and m2 depending on algorithm */
+		if (options->method == METH_JACOBI)
 		{
-			double fpisin_i = 0.0;
+			m1 = 0;
+			m2 = 1;
+		}
+		else
+		{
+			m1 = 0;
+			m2 = 0;
+		}
+		
+		stat_iteration = 0;
+		stat_precision = 0.0;
+		term_iteration = options->term_iteration;
 
-			if (options->inf_func == FUNC_FPISIN)
+		while (term_iteration > 0)
+		{
+			maxresiduum = 0;
+			/* over all rows */
+			#pragma omp for reduction(max:maxresiduum)
+			for (i = 1; i < N; i++)
 			{
-				fpisin_i = fpisin * sin(pih * (double)i);
-			}
-
-			/* over all columns */
-			for (j = 1; j < N; j++)
-			{
-				star = 0.25 * (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]);
+				double fpisin_i = 0.0;
 
 				if (options->inf_func == FUNC_FPISIN)
 				{
-					star += fpisin_i * sin(pih * (double)j);
+					fpisin_i = fpisin * sin(pih * (double)i);
 				}
 
-				if (options->termination == TERM_PREC || term_iteration == 1)
+				/* over all columns */
+				#pragma omp simd
+				for (j = 1; j < N; j++)
 				{
-					residuum    = Matrix[m2][i][j] - star;
-					residuum    = fabs(residuum);
-					maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+					star = 0.25 * (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]);
+
+					if (options->inf_func == FUNC_FPISIN)
+					{
+						star += fpisin_i * sin(pih * (double)j);
+					}
+
+					if (options->termination == TERM_PREC || term_iteration == 1)
+					{
+						residuum    = Matrix[m2][i][j] - star;
+						residuum    = fabs(residuum);
+						maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+					}
+
+					Matrix[m1][i][j] = star;
 				}
-
-				Matrix[m1][i][j] = star;
 			}
-		}
-		#pragma omp barrier
-		{
-		}
-		#pragma omp single
-		{
-			results->stat_iteration++;
-			results->stat_precision = maxresiduum;
-
 			/* exchange m1 and m2 */
 			i  = m1;
 			m1 = m2;
 			m2 = i;
-
+			stat_iteration++;
+			stat_precision = maxresiduum;
 			/* check for stopping calculation depending on termination method */
 			if (options->termination == TERM_PREC)
 			{
@@ -456,9 +458,13 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 				term_iteration--;
 			}
 		}
+		#pragma omp single nowait
+		{
+			results->m = m2;
+		}
 	}
-
-	results->m = m2;
+	results->stat_iteration = stat_iteration >> 2;
+	results->stat_precision = stat_precision;
 }
 
 /* ************************************************************************ */
@@ -562,6 +568,10 @@ main(int argc, char** argv)
 	struct calculation_results   results;
 
 	askParams(&options, argc, argv);
+
+	#ifdef _OPENMP
+	omp_set_num_threads(options.number);
+	#endif
 
 	initVariables(&arguments, &results, &options);
 
