@@ -463,7 +463,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 			results->m = m2;
 		}
 	}
-	results->stat_iteration = stat_iteration;
+	results->stat_iteration = stat_iteration / options->number;
 	results->stat_precision = stat_precision;
 }
 
