@@ -322,7 +322,7 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 	matrix Matrix = (matrix)arguments->M;
 
 	/* initialize matrix/matrices with zeros */
-	#pragma omp parallel for collapse(2) private(g,i,j)
+	#pragma omp parallel for collapse(2) private(g,i,j) schedule(runtime)
 	for (g = 0; g < arguments->num_matrices; g++)
 	{
 		for (i = 0; i <= N; i++)
@@ -337,7 +337,7 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 	/* initialize borders, depending on function (function 2: nothing to do) */
 	if (options->inf_func == FUNC_F0)
 	{
-		#pragma omp parallel for private(g,i,j)
+		#pragma omp parallel for private(g,i,j) schedule(runtime)
 		for (g = 0; g < arguments->num_matrices; g++)
 		{
 			for (i = 0; i <= N; i++)
@@ -409,7 +409,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		{
 			maxresiduum = 0;
 			/* over all columns */
-			#pragma omp for reduction(max:maxresiduum) collapse(2)
+			#pragma omp for reduction(max:maxresiduum) collapse(2) schedule(runtime)
 			for (j = 1; j < N; j++)
 			{
 				/* over all rows */
@@ -522,7 +522,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		{
 			maxresiduum = 0;
 			/* over all columns */
-			#pragma omp for reduction(max:maxresiduum)
+			#pragma omp for reduction(max:maxresiduum) schedule(runtime)
 			for (j = 1; j < N; j++)
 			{
 				/* over all rows */
@@ -636,7 +636,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		{
 			maxresiduum = 0;
 			/* over all rows */
-			#pragma omp for reduction(max:maxresiduum)
+			#pragma omp for reduction(max:maxresiduum) schedule(runtime)
 			for (i = 1; i < N; i++)
 			{
 				double fpisin_i = 0.0;
