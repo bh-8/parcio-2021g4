@@ -386,7 +386,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	double stat_precision = 0.0;
 	uint64_t term_iteration;
 
-	#pragma omp parallel private(i,j,m1,m2,star,residuum,term_iteration) reduction(+:stat_iteration) reduction(max:stat_precision)
+	#pragma omp parallel default(none) shared(options,maxresiduum,N,pih,fpisin,Matrix,results) private(i,j,m1,m2,star,residuum,term_iteration) reduction(+:stat_iteration) reduction(max:stat_precision)
 	{
 		/* initialize m1 and m2 depending on algorithm */
 		if (options->method == METH_JACOBI)
@@ -463,7 +463,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 			results->m = m2;
 		}
 	}
-	results->stat_iteration = stat_iteration >> 2;
+	results->stat_iteration = stat_iteration;
 	results->stat_precision = stat_precision;
 }
 
