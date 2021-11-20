@@ -70,6 +70,6 @@
     - bei zeilenweiser/elementweiser Datenaufteilung stagniert die Laufzeit mit wachsender Treadanzahl
     - bei spaltenweiser Datenaufteilung steigt die Laufzeit mit wachsender Threadzahl leicht an
 ---
-### Messung 2: Vergleich der Laufzeiten, abhängig von Matrixgröße (Interlines)
+### Messung 2: Vergleich der Laufzeiten (24 Threads), abhängig von Matrixgröße (Interlines)
 - TODO . . .
 ---
