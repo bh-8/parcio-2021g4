@@ -57,6 +57,18 @@
     - beste Laufzeit ab ~8 Threads (~3s), stagniert bis 24 Threads
   + Static (gestrichelt)
     - siehe guided scheduling (nahezu identisch, keine nennenswerten Abweichungen)
+- Auswertung
+  + Zeilenweise läuft die Parallelisierung am schnellsten ab (die benötigten Daten liegen im Speicher nah bei einander und es gibt weniger Seitenfehler als bei der spaltenweisen Aufteilung)
+  + Spaltenweise ist das Programm ~50% langsamer (Daten sind über den Speicher verteilt --> längere Zugriffszeit)
+  + Elementweise läuft mit 3 Sekunden mehr als 3x so lang wie zeilenweise Datenaufteilung
+  + Dynamic scheduling ist immer die langsamste Methode
+    - Zeilenweise/Spaltenweise dauert es mit wachsender Threadanzahl immer länger
+    - lediglich die elementweise Aufteilung profitiert bei wachsender Threadanzahl vom Dynamic-Scheduling und wird immer schneller
+  + Guided/Static scheduling von den Laufzeiten ist nahezu identisch
+    - bei geringer Threadzahl halbiert sich die Laufzeit bei doppelter Threadanzahl
+    - ab ~8 Threads erreicht die Laufzeit ihr Minimum
+    - bei zeilenweiser/elementweiser Datenaufteilung stagniert die Laufzeit mit wachsender Treadanzahl
+    - bei spaltenweiser Datenaufteilung steigt die Laufzeit mit wachsender Threadzahl leicht an
 ---
 ### Messung 2
 
