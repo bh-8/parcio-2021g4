@@ -1,5 +1,5 @@
 # Leistungsanalyse
-### Messung 1: Vergleich der Laufzeiten (4096 Interlines)
+### Messung 1: Vergleich der Laufzeiten (4096 Interlines), abhängig von Datenaufteilung und Scheduling
 - Datenaufteilungen: zeilen-, spalten- und elementweise Aufteilung (static scheduling, da so am schnellsten)
     ![Vergleich der Datenaufteilungen](pdf_attachment/ROWvCOLUMNvELEMENT.svg)
     + Zeilenweise (blau) [top mit 6 Threads, ~0.8s]
@@ -70,6 +70,6 @@
     - bei zeilenweiser/elementweiser Datenaufteilung stagniert die Laufzeit mit wachsender Treadanzahl
     - bei spaltenweiser Datenaufteilung steigt die Laufzeit mit wachsender Threadzahl leicht an
 ---
-### Messung 2
+### Messung 2: Vergleich der Laufzeiten, abhängig von Matrixgröße (Interlines)
 - TODO . . .
 ---
