@@ -26,7 +26,7 @@
   + Guided (orange) [top mit 8, 10 oder 12 Threads, ~0.6s]
     - 1 Thread braucht mit guided scheduling ~3s
     - 2 Threads brauchen ca. 1.5s (halbiert)
-    - am schnellsten mit 8, 10 oder 12 Threads (~0.6s): eine ungerade Threadanzahl braucht minimal mehr Zeit (~+0.05s)
+    - am schnellsten mit 8, 10 oder 12 Threads (\~0.6s): eine ungerade Threadanzahl braucht minimal mehr Zeit (\~+0.05s)
     - guided scheduling ist mit 13 oder mehr Threads wieder langsamer (~0.7s)
   + Static (gestrichelt) [top mit 8, 10 oder 12 Threads, ~0.6s]
     - siehe guided scheduling (nahezu identisch, keine nennenswerten Abweichungen)
