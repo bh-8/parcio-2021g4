@@ -71,5 +71,5 @@
     - bei spaltenweiser Datenaufteilung steigt die Laufzeit mit wachsender Threadzahl leicht an
 ---
 ### Messung 2
-
+- TODO . . .
 ---
