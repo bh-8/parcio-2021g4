@@ -64,7 +64,7 @@
   + Dynamic scheduling ist immer die langsamste Methode
     - Zeilenweise/Spaltenweise dauert es mit wachsender Threadanzahl immer länger
     - lediglich die elementweise Aufteilung profitiert bei wachsender Threadanzahl vom Dynamic-Scheduling und wird immer schneller
-  + Guided/Static scheduling von den Laufzeiten ist nahezu identisch
+  + Guided/Static scheduling ist von den Laufzeiten nahezu identisch
     - bei geringer Threadzahl halbiert sich die Laufzeit bei doppelter Threadanzahl
     - ab ~8 Threads erreicht die Laufzeit ihr Minimum
     - bei zeilenweiser/elementweiser Datenaufteilung stagniert die Laufzeit mit wachsender Treadanzahl
