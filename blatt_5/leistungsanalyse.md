@@ -1,7 +1,6 @@
 # Leistungsanalyse
 ### Messung 1: Vergleich der Laufzeiten (4096 Interlines)
-- Datenaufteilungen: zeilen-, spalten- und elementweise Aufteilung
-- Static Scheduling, da so am schnellsten
+- Datenaufteilungen: zeilen-, spalten- und elementweise Aufteilung (static scheduling, da so am schnellsten)
     ![Vergleich der Datenaufteilungen](pdf_attachment/ROWvCOLUMNvELEMENT.svg)
     + Zeilenweise (blau) [top mit 6 Threads, ~0.8s]
       - bei einem Thread läuft das Programm ca. 3s
@@ -32,8 +31,32 @@
     - siehe guided scheduling (nahezu identisch, keine nennenswerten Abweichungen)
 - Scheduling-Algorithmen: Spaltenweise
   ![Column Scheduling](pdf_attachment/COLUMN.svg)
+  + Dynamic (blau) [top mit 12 Threads, ~1.6s]
+    - 1 Thread braucht mit dynamic scheduling ~6.1s
+    - bei 2 Threads mit ~5.9s Laufzeit nur mäßig schneller, außerdem mit 3 Threads schneller als mit 4
+    - beste Laufzeit mit 12 Threads (~1.6s)
+    - bei 24 Threads steigt die Laufzeit auf ~2s
+  + Guided (orange) [top mit 10 Threads, ~1s]
+    - 1 Thread braucht mit guided scheduling ~6.2s
+    - 2 Threads doppelt so schnell, 4 Threads 4x so schnell
+    - beste Laufzeit mit 8-10 Threads, ~1s
+    - mehr mehr Threads linear mehr Zeit (24 Threads ~1.9s)
+  + Static (gestrichelt) [top mit 10 Threads, ~1s]
+    - siehe guided scheduling (nahezu identisch)
+    - bei 24 Threads ist static scheduling leicht schneller als guided: ~1.6s (~0.3s schneller)
 - Scheduling-Algorithmen: Elementweise
   ![Element Scheduling](pdf_attachment/ELEMENT.svg)
+  + Dynamic (blau) [top mit 23-24 Threads, ~21s]
+    - langsamstes Scheduling-Verfahren
+    - 1 Threads braucht ca. 28s, 2 Threads brauchen allerdings ~106s
+    - 3 Threads sind ~6s schneller als 4 Threads (~58s)
+    - von 5 bis 24 Threads verringert sich die Laufzeit immer weiter auf ~21s
+  + Guided (orange) [top mit 8-24 Threads, ~2-3s]
+    - 1 Thread benötigt ~21s
+    - 2 Threads sind ca. doppelt so schnell (~11s)
+    - beste Laufzeit ab ~8 Threads (~3s), stagniert bis 24 Threads
+  + Static (gestrichelt)
+    - siehe guided scheduling (nahezu identisch, keine nennenswerten Abweichungen)
 ---
 ### Messung 2
 
