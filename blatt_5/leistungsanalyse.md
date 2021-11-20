@@ -71,5 +71,7 @@
     - bei spaltenweiser Datenaufteilung steigt die Laufzeit mit wachsender Threadzahl leicht an
 ---
 ### Messung 2: Vergleich der Laufzeiten (24 Threads), abhängig von Matrixgröße (Interlines)
-- TODO . . .
+- (Werte x-Achse vor 2^n, y-Achse logarithmische Skale)
+  ![Element Scheduling](pdf_attachment/interlines.svg)
+  + Anstieg der Laufzeit in Abhängigkeit zu den Interlines ist linear
 ---
