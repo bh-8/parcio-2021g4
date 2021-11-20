@@ -18,8 +18,18 @@
       - die Laufzeit verbessert sich mit einer Anzahl von 12 Threads auf ~3s
       - mehr Threads verbessern die Laufzeit jedoch nicht
 - Scheduling-Algorithmen: Static, Dynamic, Guided
-  ![Static Scheduling][pdf_attachment/ROW.svg]
-  + 
+  ![Row Scheduling][pdf_attachment/ROW.svg]
+  + Static: 
+  + Dynamic: 
+  + Guided: 
+  ![Column Scheduling][pdf_attachment/COLUMN.svg]
+  + Static: 
+  + Dynamic: 
+  + Guided: 
+  ![Element Scheduling][pdf_attachment/ELEMENT.svg]
+  + Static: 
+  + Dynamic: 
+  + Guided: 
 - 1-24 Threads
 ---
 ### Messung 2
