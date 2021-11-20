@@ -1,0 +1,128 @@
+<h1>Leistungsanalyse</h1>
+
+<h3>Messung 1: Vergleich der Laufzeiten (4096 Interlines), abhängig von Datenaufteilung und Scheduling</h3>
+
+<ul>
+<li><p>Datenaufteilungen: zeilen-, spalten- und elementweise Aufteilung (static
+scheduling, da so am schnellsten)</p>
+
+<p><img src="pdf_attachment/ROWvCOLUMNvELEMENT.svg" alt="Vergleich der Datenaufteilungen" /></p>
+
+<ul>
+<li>Zeilenweise (blau) [top mit 6 Threads, ~0.8s]</li>
+<li>bei einem Thread läuft das Programm ca. 3s</li>
+<li>zwei Threads halbieren die Laufzeit (~1.5s), 4 Threads brauchen ca. 1s</li>
+<li>ab 6 Threads ist keine nennenswerte Leistungsverbesserung zu erkennen (~0.8s)</li>
+<li>Spaltenweise (orange) [top mit 8 Threads, ~1-1.2s]</li>
+<li>bei einem Thread läuft das Programm ca. 6 Sekunden</li>
+<li>zwei Threads halbieren die Laufzeit (~3s), 4 Threads benötigen ~2s</li>
+<li>die Laufzeit ist mit ca. 8 Threads am geringsten (~1.2s)</li>
+<li>mit weiter steigender Threadanzahl bis 24 Threads steigt die Laufzeit auf ~2s wieder an</li>
+<li>Elementweise (gelb) [top mit 12 Threads, ~3s]</li>
+<li>diese Datenaufteilung ist von den gemessenen mit Abstand die Langsamste: ein Thread benötigt bis zu 22s</li>
+<li>zwei Threads halbieren die Laufzeit (~11s), 4 Treads laufen ~6s</li>
+<li>die Laufzeit verbessert sich mit einer Anzahl von 12 Threads auf ~3s</li>
+<li>mehr Threads verbessern die Laufzeit jedoch nicht</li>
+</ul></li>
+</ul>
+
+<div style="page-break-after: always"></div>
+
+<ul>
+<li><p>Scheduling-Algorithmen: Zeilenweise</p>
+
+<p><img src="pdf_attachment/ROW.svg" alt="Row Scheduling" /></p>
+
+<ul>
+<li>Dynamic (blau) [top mit 6-10 Threads, ~1s]</li>
+<li>1 Thread braucht mit dynamic scheduling ~3s</li>
+<li>Dynamic scheduling ist mit 6-10 Threads am schnellsten (~1s)</li>
+<li>bei 11 Threads und mehr steigt die Laufzeit an (~1.65s für 24 Threads)</li>
+<li>Guided (orange) [top mit 8, 10 oder 12 Threads, ~0.6s]</li>
+<li>1 Thread braucht mit guided scheduling ~3s</li>
+<li>2 Threads brauchen ca. 1.5s (halbiert)</li>
+<li>am schnellsten mit 8, 10 oder 12 Threads (\~0.6s): eine ungerade Threadanzahl braucht minimal mehr Zeit (\~+0.05s)</li>
+<li>guided scheduling ist mit 13 oder mehr Threads wieder langsamer (~0.7s)</li>
+<li>Static (gestrichelt) [top mit 8, 10 oder 12 Threads, ~0.6s]</li>
+<li>siehe guided scheduling (nahezu identisch, keine nennenswerten Abweichungen)</li>
+</ul></li>
+</ul>
+
+<div style="page-break-after: always"></div>
+
+<ul>
+<li><p>Scheduling-Algorithmen: Spaltenweise</p>
+
+<p><img src="pdf_attachment/COLUMN.svg" alt="Column Scheduling" /></p>
+
+<ul>
+<li>Dynamic (blau) [top mit 12 Threads, ~1.6s]</li>
+<li>1 Thread braucht mit dynamic scheduling ~6.1s</li>
+<li>bei 2 Threads mit ~5.9s Laufzeit nur mäßig schneller, außerdem mit 3 Threads schneller als mit 4</li>
+<li>beste Laufzeit mit 12 Threads (~1.6s)</li>
+<li>bei 24 Threads steigt die Laufzeit auf ~2s</li>
+<li>Guided (orange) [top mit 10 Threads, ~1s]</li>
+<li>1 Thread braucht mit guided scheduling ~6.2s</li>
+<li>2 Threads doppelt so schnell, 4 Threads 4x so schnell</li>
+<li>beste Laufzeit mit 8-10 Threads, ~1s</li>
+<li>mehr mehr Threads linear mehr Zeit (24 Threads ~1.9s)</li>
+<li>Static (gestrichelt) [top mit 10 Threads, ~1s]</li>
+<li>siehe guided scheduling (nahezu identisch)</li>
+<li>bei 24 Threads ist static scheduling leicht schneller als guided: ~1.6s (~0.3s schneller)</li>
+</ul></li>
+</ul>
+
+<div style="page-break-after: always"></div>
+
+<ul>
+<li><p>Scheduling-Algorithmen: Elementweise</p>
+
+<p><img src="pdf_attachment/ELEMENT.svg" alt="Element Scheduling" /></p>
+
+<ul>
+<li>Dynamic (blau) [top mit 23-24 Threads, ~21s]</li>
+<li>langsamstes Scheduling-Verfahren</li>
+<li>1 Threads braucht ca. 28s, 2 Threads brauchen allerdings ~106s</li>
+<li>3 Threads sind ~6s schneller als 4 Threads (~58s)</li>
+<li>von 5 bis 24 Threads verringert sich die Laufzeit immer weiter auf ~21s</li>
+<li>Guided (orange) [top mit 8-24 Threads, ~2-3s]</li>
+<li>1 Thread benötigt ~21s</li>
+<li>2 Threads sind ca. doppelt so schnell (~11s)</li>
+<li>beste Laufzeit ab ~8 Threads (~3s), stagniert bis 24 Threads</li>
+<li>Static (gestrichelt)</li>
+<li>siehe guided scheduling (nahezu identisch, keine nennenswerten Abweichungen)</li>
+</ul></li>
+<li><p>Auswertung</p>
+
+<ul>
+<li>Zeilenweise läuft die Parallelisierung am schnellsten ab (die benötigten Daten liegen im Speicher nah bei einander und es gibt weniger Seitenfehler als bei der spaltenweisen Aufteilung)</li>
+<li>Spaltenweise ist das Programm ~50% langsamer (Daten sind über den Speicher verteilt --> längere Zugriffszeit)</li>
+<li>Elementweise läuft mit 3 Sekunden mehr als 3x so lang wie zeilenweise Datenaufteilung</li>
+<li>Dynamic scheduling ist immer die langsamste Methode</li>
+<li>Zeilenweise/Spaltenweise dauert es mit wachsender Threadanzahl immer länger</li>
+<li>lediglich die elementweise Aufteilung profitiert bei wachsender Threadanzahl vom Dynamic-Scheduling und wird immer schneller</li>
+<li>Guided/Static scheduling ist von den Laufzeiten nahezu identisch</li>
+<li>bei geringer Threadzahl halbiert sich die Laufzeit bei doppelter Threadanzahl</li>
+<li>ab ~8 Threads erreicht die Laufzeit ihr Minimum</li>
+<li>bei zeilenweiser/elementweiser Datenaufteilung stagniert die Laufzeit mit wachsender Treadanzahl</li>
+<li>bei spaltenweiser Datenaufteilung steigt die Laufzeit mit wachsender Threadzahl leicht an</li>
+</ul></li>
+</ul>
+
+<div style="page-break-after: always"></div>
+
+<hr />
+
+<h3>Messung 2: Vergleich der Laufzeiten (24 Threads), abhängig von Matrixgröße (Interlines)</h3>
+
+<ul>
+<li><p>(Werte x-Achse vor 2^n, y-Achse logarithmische Skale)</p>
+
+<p><img src="pdf_attachment/interlines.svg" alt="Element Scheduling" /></p>
+
+<ul>
+<li>Anstieg der Laufzeit in Abhängigkeit zu den Interlines ist linear</li>
+</ul></li>
+</ul>
+
+<hr />
