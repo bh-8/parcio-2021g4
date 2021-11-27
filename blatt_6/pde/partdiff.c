@@ -34,6 +34,9 @@
 #include <string.h>
 #include <sys/time.h>
 
+//PTHREADS: include
+#include <pthread.h>
+
 /* ************* */
 /* Some defines. */
 /* ************* */
@@ -51,6 +54,23 @@
 #define FUNC_FPISIN       2
 #define TERM_PREC         1
 #define TERM_ITER         2
+
+//PTHREADS: Global thread array
+pthread_t threads[MAX_THREADS];
+
+//PTHREADS: Argument struct
+struct thread_arguments
+{
+	struct options const* options;
+	struct calculation_arguments const* arguments;
+	int N;
+	int iStart;
+	int iEnd;
+	double* maxRes;
+	void* matrixData;
+	int* m1;
+	int* m2;
+};
 
 struct calculation_arguments
 {
@@ -305,15 +325,52 @@ calculate_func(struct calculation_arguments const* arguments, struct options con
 }
 
 /* ************************************************************************ */
+/* calculate: threadin                                                      */
+/* ************************************************************************ */
+//PTHREADS: Thread function
+void * thread_calcrows(void *param) {
+	struct thread_arguments threadArgs = *((struct thread_arguments * )param);
+	int N = threadArgs.N;
+	double* maxresiduumPtr = threadArgs.maxRes;
+	
+	typedef double(*matrix)[N + 1][N + 1];
+	matrix Matrix = (matrix)threadArgs.matrixData;
+	
+	int m1 = *threadArgs.m1;
+	int m2 = *threadArgs.m2;
+	
+	//over requested rows
+	for (int i = threadArgs.iStart; i < threadArgs.iEnd; i++)
+	{
+		//over all columns
+		for (int j = 1; j < N; j++)
+		{
+			double star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
+			star += calculate_func(threadArgs.arguments, threadArgs.options, i, j);
+			
+			double residuum = Matrix[m2][i][j] - star;
+			residuum = fabs(residuum);
+			*maxresiduumPtr = (residuum < *maxresiduumPtr) ? *maxresiduumPtr : residuum;
+			
+			Matrix[m1][i][j] = star;
+		}
+	}
+	
+	//free overhead of thread
+	free(param);
+	
+	return NULL;
+}
+
+/* ************************************************************************ */
 /* calculate: solves the equation                                           */
 /* ************************************************************************ */
 static void
 calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	int    i, j;        /* local variables for loops */
+	//PTHREADS: some variables moved into thread function
+	int    i;           /* local variable for loops */
 	int    m1, m2;      /* used as indices for old and new matrices */
-	double star;        /* four times center value minus 4 neigh.b values */
-	double residuum;    /* residuum of current iteration */
 	double maxresiduum; /* maximum residuum value of a slave in iteration */
 
 	int const N = arguments->N;
@@ -335,13 +392,50 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		m1 = 0;
 		m2 = 0;
 	}
+	
+	//PTHREADS: get basic numbers
+	int numberThreads = (int)options->number;
+	int rowsPerThread = N / numberThreads;
+	
 	while (term_iteration > 0)
 	{
 		maxresiduum = 0;
-		/* over all rows */
+		
+		//PTHREADS: Loop through requested amount of threads
+		for(int iThread = 0; iThread < numberThreads; iThread++) {
+			int iStart = iThread * rowsPerThread + 1;
+			int iOffset = rowsPerThread;
+			int iEnd = iStart + iOffset;
+			if(iThread + 1 == numberThreads)
+				iEnd = N;
+			
+			struct thread_arguments *currentArgs = (struct thread_arguments*)malloc(sizeof(struct thread_arguments));
+			
+			//set arguments
+			currentArgs->options = options;
+			currentArgs->arguments = arguments;
+			currentArgs->N = N;
+			currentArgs->iStart = iStart;
+			currentArgs->iEnd = iEnd;
+			currentArgs->maxRes = &maxresiduum;
+			currentArgs->matrixData = Matrix;
+			currentArgs->m1 = &m1;
+			currentArgs->m2 = &m2;
+			
+			pthread_create(&threads[iThread], NULL, thread_calcrows, currentArgs);
+		}
+		
+		//PTHREADS: join all threads
+		for(int iThread = 0; iThread < numberThreads; iThread++) {
+			pthread_join(threads[iThread], NULL);
+		}
+		
+		/*
+		//ORIGINAL CODE:
+		
 		for (i = 1; i < N; i++)
 		{
-			/* over all columns */
+			//over all columns
 			for (j = 1; j < N; j++)
 			{
 				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
@@ -354,8 +448,8 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 
 				Matrix[m1][i][j] = star;
 			}
-		}
-
+		}*/
+		
 		results->stat_iteration++;
 		results->stat_precision = maxresiduum;
 
