@@ -1,2 +1,4 @@
 *.o
 blatt_?/**/partdiff
+blatt_?/**/partdiff_orig
+blatt_?/**/partdiff_orig_threads
