@@ -83,11 +83,12 @@ struct options
 
 struct shared_args
 {
+	struct options const* options;
+	double pih;
+	double fpisin;
 	double* Matrix;
 	double* shared_maxresiduum;
 	uint64_t thread_num;
-	struct options const* options;
-	struct calculation_arguments const* arguments;
 	struct calculation_results* results;
 	pthread_barrier_t* inner_barrier;
 	int N;
@@ -366,24 +367,6 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 }
 
 /* ************************************************************************ */
-/* calculate_func: calculates the interference function                     */
-/* ************************************************************************ */
-static inline double
-calculate_func(struct calculation_arguments const* arguments, struct options const* options, int i, int j)
-{
-	double const h = arguments->h;
-
-	if (options->inf_func == FUNC_FPISIN)
-	{
-		return ((2 * M_PI * M_PI) * h * h * sin(M_PI * h * (double)i) * sin(M_PI * h * (double)j)) / 4;
-	}
-	else
-	{
-		return 0.0;
-	}
-}
-
-/* ************************************************************************ */
 /* calculate_t: gets run by each thread to solve the equation               */
 /* ************************************************************************ */
 static void *
@@ -392,13 +375,14 @@ calculate_t(void *data)
 	struct shared_args *args = (struct shared_args *)data;
 	struct options const *options = args->options;
 	int const N = args->N;
+	double pih = args->pih;
+	double fpisin = args->fpisin;
 	typedef double(*matrix)[N + 1][N + 1];
 	matrix Matrix = (matrix)args->Matrix;
 	struct calculation_results *results = args->results;
 	uint64_t thread_num = args->thread_num;
 	pthread_barrier_t *inner_barrier = args->inner_barrier;
 	double *shared_maxresiduum = args->shared_maxresiduum;
-	struct calculation_arguments const *arguments = args->arguments;
 
 	int i, j;			/* local variables for loops */
 	int m1, m2;			/* used as indices for old and new matrices */
@@ -434,16 +418,29 @@ calculate_t(void *data)
 		//#pragma omp for reduction(max:maxresiduum) schedule(runtime)
 		for (i = lower; i < upper; i++)
 		{
+			double fpisin_i = 0.0;
+
+			if (options->inf_func == FUNC_FPISIN)
+			{
+				fpisin_i = fpisin * sin(pih * (double)i);
+			}
+
 			/* over all columns */
 			for (j = 1; j < N; j++)
 			{
-				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
+				star = 0.25 * (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]);
 
-				star += calculate_func(arguments, options, i, j);
+				if (options->inf_func == FUNC_FPISIN)
+				{
+					star += fpisin_i * sin(pih * (double)j);
+				}
 
-				residuum = Matrix[m2][i][j] - star;
-				residuum = fabs(residuum);
-				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+				if (options->termination == TERM_PREC || term_iteration == 1)
+				{
+					residuum = Matrix[m2][i][j] - star;
+					residuum = fabs(residuum);
+					maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+				}
 
 				Matrix[m1][i][j] = star;
 			}
@@ -492,9 +489,19 @@ calculate_t(void *data)
 /* calculate: solves the equation                                           */
 /* ************************************************************************ */
 static void
-calculate(struct calculation_arguments const *arguments, struct calculation_results *results, struct options const *options)
+calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	int const N = arguments->N;
+	int const    N = arguments->N;
+	double const h = arguments->h;
+
+	double pih    = 0.0;
+	double fpisin = 0.0;
+
+	if (options->inf_func == FUNC_FPISIN)
+	{
+		pih    = M_PI * h;
+		fpisin = 0.25 * (2 * M_PI * M_PI) * h * h;
+	}
 
 	//#pragma omp parallel default(none) shared(options,maxresiduum,N,pih,fpisin,Matrix,results) private(i,j,m1,m2,star,residuum,term_iteration) reduction(+:stat_iteration) reduction(max:stat_precision)
 	struct shared_args args[options->number];
@@ -507,13 +514,14 @@ calculate(struct calculation_arguments const *arguments, struct calculation_resu
 	{
 		args[t].options = options;
 		args[t].N = N;
+		args[t].pih = pih;
+		args[t].fpisin = fpisin;
 		args[t].Matrix = arguments->M;
 		args[t].results = results;
 		args[t].thread_num = t;
 		args[t].inner_barrier = &inner_barrier;
 		args[t].shared_maxresiduum = (double *)&shared_maxresiduum;
-		args[t].arguments = arguments;
-
+		
 		pthread_create(&threads[t], NULL, calculate_t, (void *)&args[t]);
 	}
 
