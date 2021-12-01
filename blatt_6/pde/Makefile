@@ -1,4 +1,4 @@
-CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Ofast -pthread
+CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -Ofast -march=native -pthread
 LDFLAGS = $(CFLAGS)
 LDLIBS  = -lm
 
