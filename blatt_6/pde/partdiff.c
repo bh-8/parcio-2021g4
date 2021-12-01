@@ -451,7 +451,7 @@ calculate_t(void *data)
 		pthread_barrier_wait(inner_barrier);
 		if (options->termination == TERM_PREC || term_iteration == 1)
 		{
-			for (uint64_t k = 0; k < thread_num; ++k)
+			for (uint64_t k = 0; k < options->number; ++k)
 			{
 				maxresiduum = (shared_maxresiduum[k] < maxresiduum) ? maxresiduum : shared_maxresiduum[k];
 			}
