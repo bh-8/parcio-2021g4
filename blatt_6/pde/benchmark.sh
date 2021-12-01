@@ -1,33 +1,33 @@
 #!/bin/sh
 hyperfine -w 1 -m 10 -s basic -S dash \
-	-n="clang 1 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 1 2 4096 2 2 1" \
-	-n="clang 1 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 1 2 4096 2 2 1" \
-	-n="clang 2 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 2 2 4096 2 2 1" \
-	-n="clang 2 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 2 2 4096 2 2 1" \
-	-n="clang 3 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 3 2 4096 2 2 1" \
-	-n="clang 3 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 3 2 4096 2 2 1" \
-	-n="clang 6 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 6 2 4096 2 2 1" \
-	-n="clang 6 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 6 2 4096 2 2 1" \
-	-n="clang 12 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 12 2 4096 2 2 1" \
-	-n="clang 12 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 12 2 4096 2 2 1" \
-	-n="clang 18 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 18 2 4096 2 2 1" \
-	-n="clang 18 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 18 2 4096 2 2 1" \
-	-n="clang 24 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 24 2 4096 2 2 1" \
-	-n="clang 24 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 24 2 4096 2 2 1" \
-	-n="clang 1 partdiff_orig" -p="OPTFLAGS='-Ofast -march=native' CC=clang ./build.sh partdiff_orig" "./partdiff_orig 1 2 4096 2 2 1" \
-	-n="gcc 1 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 1 2 4096 2 2 1" \
-	-n="gcc 1 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 1 2 4096 2 2 1" \
-	-n="gcc 2 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 2 2 4096 2 2 1" \
-	-n="gcc 2 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 2 2 4096 2 2 1" \
-	-n="gcc 3 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 3 2 4096 2 2 1" \
-	-n="gcc 3 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 3 2 4096 2 2 1" \
-	-n="gcc 6 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 6 2 4096 2 2 1" \
-	-n="gcc 6 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 6 2 4096 2 2 1" \
-	-n="gcc 12 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 12 2 4096 2 2 1" \
-	-n="gcc 12 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 12 2 4096 2 2 1" \
-	-n="gcc 18 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 18 2 4096 2 2 1" \
-	-n="gcc 18 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 18 2 4096 2 2 1" \
-	-n="gcc 24 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 24 2 4096 2 2 1" \
-	-n="gcc 24 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 24 2 4096 2 2 1" \
-	-n="gcc 1 partdiff_orig" -p="OPTFLAGS='-Ofast -march=native' CC=gcc ./build.sh partdiff_orig" "./partdiff_orig 1 2 4096 2 2 1" \
+	-n="clang 1 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 1 2 4096 2 2 19" \
+	-n="clang 1 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 1 2 4096 2 2 19" \
+	-n="clang 2 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 2 2 4096 2 2 19" \
+	-n="clang 2 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 2 2 4096 2 2 19" \
+	-n="clang 3 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 3 2 4096 2 2 19" \
+	-n="clang 3 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 3 2 4096 2 2 19" \
+	-n="clang 6 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 6 2 4096 2 2 19" \
+	-n="clang 6 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 6 2 4096 2 2 19" \
+	-n="clang 12 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 12 2 4096 2 2 19" \
+	-n="clang 12 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 12 2 4096 2 2 19" \
+	-n="clang 18 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 18 2 4096 2 2 19" \
+	-n="clang 18 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 18 2 4096 2 2 19" \
+	-n="clang 24 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff" "./partdiff 24 2 4096 2 2 19" \
+	-n="clang 24 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=clang ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 24 2 4096 2 2 19" \
+	-n="clang 1 partdiff_orig" -p="OPTFLAGS='-Ofast -march=native' CC=clang ./build.sh partdiff_orig" "./partdiff_orig 1 2 4096 2 2 19" \
+	-n="gcc 1 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 1 2 4096 2 2 19" \
+	-n="gcc 1 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 1 2 4096 2 2 19" \
+	-n="gcc 2 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 2 2 4096 2 2 19" \
+	-n="gcc 2 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 2 2 4096 2 2 19" \
+	-n="gcc 3 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 3 2 4096 2 2 19" \
+	-n="gcc 3 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 3 2 4096 2 2 19" \
+	-n="gcc 6 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 6 2 4096 2 2 19" \
+	-n="gcc 6 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 6 2 4096 2 2 19" \
+	-n="gcc 12 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 12 2 4096 2 2 19" \
+	-n="gcc 12 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 12 2 4096 2 2 19" \
+	-n="gcc 18 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 18 2 4096 2 2 19" \
+	-n="gcc 18 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 18 2 4096 2 2 19" \
+	-n="gcc 24 partdiff" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff" "./partdiff 24 2 4096 2 2 19" \
+	-n="gcc 24 partdiff_blatt3_threaded" -p="OPTFLAGS='-Ofast -march=native -pthread' CC=gcc ./build.sh partdiff_blatt3_threaded" "./partdiff_blatt3_threaded 24 2 4096 2 2 19" \
+	-n="gcc 1 partdiff_orig" -p="OPTFLAGS='-Ofast -march=native' CC=gcc ./build.sh partdiff_orig" "./partdiff_orig 1 2 4096 2 2 19" \
 	--export-csv bench.csv --export-json bench.json --export-markdown bench.md
