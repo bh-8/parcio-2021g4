@@ -635,6 +635,7 @@ main(int argc, char** argv)
 
 	if (options.method == METH_GAUSS_SEIDEL)
 	{
+		printf("This version only works with Jacobi\n");
 		return 1;
 	}
 
