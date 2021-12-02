@@ -14,6 +14,9 @@ fi
 cd "${FOLDER}/.."
 find "${FOLDER}" -type f -name Makefile -print0 | \
 	xargs -0 -I{} sh -c 'cd $(echo "{}" | cut -d "/" -f -2); make clean > /dev/null'
+cd "${FOLDER}"
+git clean -dX -f
+cd "${FOLDER}/.."
 NAMES="$(cat "gruppe.txt" | cut -d ' ' -f 2 | tr -d '\n')"
 cp -a -R --reflink=auto "${FOLDER}" "${NAMES}"
 cp -a --reflink=auto "gruppe.txt" "${NAMES}/gruppe.txt"
