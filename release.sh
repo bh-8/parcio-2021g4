@@ -11,13 +11,12 @@ fi
 if test -d "${FOLDER}/_abgabe"; then
 	rm -r "${FOLDER}/_abgabe"
 fi
-cd "${FOLDER}/.." || exit 2
 # shellcheck disable=SC2016
 find "${FOLDER}" -type f -name Makefile -print0 | \
 	xargs -0 -I{} sh -c 'cd $(echo "{}" | cut -d "/" -f -2); make clean > /dev/null'
 cd "${FOLDER}" || exit 2
 git clean -dX -f
-cd "${FOLDER}/.." || exit 2
+cd ".." || exit 2
 NAMES="$(cut -d ' ' -f 2 "gruppe.txt" | tr -d '\n')"
 cp -a -R --reflink=auto "${FOLDER}" "${NAMES}"
 cp -a --reflink=auto "gruppe.txt" "${NAMES}/gruppe.txt"
