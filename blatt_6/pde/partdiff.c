@@ -83,12 +83,12 @@ struct options
 
 struct shared_args
 {
-	struct options const* options;
 	double pih;
 	double fpisin;
 	double* Matrix;
 	double* shared_maxresiduum;
 	uint64_t thread_num;
+	struct options const* options;
 	struct calculation_results* results;
 	pthread_barrier_t* inner_barrier;
 	int N;
