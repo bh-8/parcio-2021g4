@@ -431,7 +431,6 @@ calculate_t(void *data)
 	while (term_iteration > 0)
 	{
 		/* over all rows */
-		//#pragma omp for reduction(max:maxresiduum) schedule(runtime)
 		for (i = lower; i < upper; i++)
 		{
 			/* over all columns */
@@ -496,7 +495,6 @@ calculate(struct calculation_arguments const *arguments, struct calculation_resu
 {
 	int const N = arguments->N;
 
-	//#pragma omp parallel default(none) shared(options,maxresiduum,N,pih,fpisin,Matrix,results) private(i,j,m1,m2,star,residuum,term_iteration) reduction(+:stat_iteration) reduction(max:stat_precision)
 	struct shared_args args[options->number];
 	double shared_maxresiduum[options->number];
 
