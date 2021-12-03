@@ -395,7 +395,7 @@ calculate_t(void *data)
 	typedef double(*matrix)[N + 1][N + 1];
 	matrix Matrix = (matrix)args->Matrix;
 	struct calculation_results *results = args->results;
-	uint64_t thread_num = args->thread_num;
+	int thread_num = args->thread_num;
 	pthread_barrier_t *inner_barrier = args->inner_barrier;
 	double *shared_maxresiduum = args->shared_maxresiduum;
 	struct calculation_arguments const *arguments = args->arguments;
