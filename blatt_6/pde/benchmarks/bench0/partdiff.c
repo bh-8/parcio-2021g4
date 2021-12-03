@@ -83,12 +83,12 @@ struct options
 
 struct shared_args
 {
+	struct options const* options;
 	double pih;
 	double fpisin;
 	double* Matrix;
 	double* shared_maxresiduum;
 	uint64_t thread_num;
-	struct options const* options;
 	struct calculation_results* results;
 	pthread_barrier_t* inner_barrier;
 	int N;
@@ -380,7 +380,7 @@ calculate_t(void *data)
 	typedef double(*matrix)[N + 1][N + 1];
 	matrix Matrix = (matrix)args->Matrix;
 	struct calculation_results *results = args->results;
-	int thread_num = args->thread_num;
+	uint64_t thread_num = args->thread_num;
 	pthread_barrier_t *inner_barrier = args->inner_barrier;
 	double *shared_maxresiduum = args->shared_maxresiduum;
 
@@ -405,22 +405,17 @@ calculate_t(void *data)
 		m2 = 0;
 	}
 
-	int count = N / options->number;
-	int remainder = N % options->number;
+	int count = N / options->number; // this can be put in calculate
 	int lower = 1 + thread_num * count;
 	int upper = lower + count;
-
-	lower += thread_num < remainder ? thread_num : remainder;
-	upper += thread_num < remainder ? thread_num + 1 : remainder;
-
 	upper = (upper > N) ? N : upper;
 	upper = (count == 0) ? N : upper;
+	maxresiduum = 0.0;
 
 	while (term_iteration > 0)
 	{
-		maxresiduum = 0.0;
-
 		/* over all rows */
+		//#pragma omp for reduction(max:maxresiduum) schedule(runtime)
 		for (i = lower; i < upper; i++)
 		{
 			double fpisin_i = 0.0;
@@ -508,6 +503,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		fpisin = 0.25 * (2 * M_PI * M_PI) * h * h;
 	}
 
+	//#pragma omp parallel default(none) shared(options,maxresiduum,N,pih,fpisin,Matrix,results) private(i,j,m1,m2,star,residuum,term_iteration) reduction(+:stat_iteration) reduction(max:stat_precision)
 	struct shared_args args[options->number];
 	double shared_maxresiduum[options->number];
 

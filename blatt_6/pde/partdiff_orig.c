@@ -5,8 +5,6 @@
  * Copyright (C) 1997 Andreas C. Schmidt
  * Copyright (C) 2007-2010 Julian M. Kunkel
  * Copyright (C) 2010-2021 Michael Kuhn
- * Copyright (C) 2021 Bernhard Birnbaum
- * Copyright (C) 2021 Philipp David
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +33,6 @@
 #include <malloc.h>
 #include <string.h>
 #include <sys/time.h>
-#include <pthread.h>
 
 /* ************* */
 /* Some defines. */
@@ -81,29 +78,6 @@ struct options
 	double   term_precision; /* terminate if precision reached */
 };
 
-struct shared_args
-{
-	double pih;
-	double fpisin;
-	double* Matrix;
-	double* shared_maxresiduum;
-	uint64_t thread_num;
-	struct options const* options;
-	struct calculation_results* results;
-	pthread_barrier_t* inner_barrier;
-	int N;
-};
-
-struct vector
-{
-	size_t** buf;
-	size_t size;
-	size_t max_size;
-};
-
-static void push(void*);
-static void* pop();
-
 /* ************************************************************************ */
 /* Global variables                                                         */
 /* ************************************************************************ */
@@ -111,7 +85,6 @@ static void* pop();
 /* time measurement variables */
 struct timeval start_time; /* time when program started */
 struct timeval comp_time;  /* time when calculation completed */
-struct vector allocated_memory;
 
 static void
 usage(char* name)
@@ -230,13 +203,12 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 }
 
 /* ************************************************************************ */
-/* cleanup: frees all allocated memory                                      */
+/* freeMatrices: frees memory for matrices                                  */
 /* ************************************************************************ */
-static inline void
-cleanup() {
-	for (void* p = pop(); p != NULL; p = pop())
-		free(p);
-	free(allocated_memory.buf);
+static void
+freeMatrices(struct calculation_arguments* arguments)
+{
+	free(arguments->M);
 }
 
 /* ************************************************************************ */
@@ -251,61 +223,9 @@ allocateMemory(size_t size)
 	if ((p = malloc(size)) == NULL)
 	{
 		printf("Speicherprobleme! (%" PRIu64 " Bytes angefordert)\n", size);
-		cleanup();
 		exit(1);
 	}
 
-	push(p);
-
-	return p;
-}
-
-/* ************************************************************************ */
-/* push: push a pointer into the vector                                     */
-/* ************************************************************************ */
-static void
-push(void* data)
-{
-	if (allocated_memory.max_size == 0)
-	{
-		if ((allocated_memory.buf = malloc(sizeof(size_t*) << 3)) ==
-				NULL)
-		{
-			cleanup();
-			exit(1);
-		}
-		allocated_memory.max_size = 8;
-	}
-	else if (allocated_memory.max_size == allocated_memory.size)
-	{
-		size_t** newbuf = malloc(sizeof(size_t*) *
-				((allocated_memory.size) +
-				 (allocated_memory.size >> 1)));
-		if (newbuf == NULL)
-		{
-			cleanup();
-			exit(1);
-		}
-		memcpy(newbuf, allocated_memory.buf, allocated_memory.size);
-		free(allocated_memory.buf);
-		allocated_memory.buf = newbuf;
-		allocated_memory.max_size = (allocated_memory.size) +
-			(allocated_memory.size >> 1);
-	}
-	allocated_memory.buf[allocated_memory.size++] = (size_t*) data;
-
-}
-
-/* ************************************************************************ */
-/* pop: pop a pointer from the vector, return NULL if empty                 */
-/* ************************************************************************ */
-static void*
-pop()
-{
-	if (allocated_memory.size == 0)
-		return NULL;
-	void* p = allocated_memory.buf[--(allocated_memory.size)];
-	allocated_memory.buf[allocated_memory.size] = NULL;
 	return p;
 }
 
@@ -367,31 +287,28 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 }
 
 /* ************************************************************************ */
-/* calculate_t: gets run by each thread to solve the equation               */
+/* calculate: solves the equation                                           */
 /* ************************************************************************ */
-static void *
-calculate_t(void *data)
+static void
+calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	struct shared_args *args = (struct shared_args *)data;
-	struct options const *options = args->options;
-	int const N = args->N;
-	double pih = args->pih;
-	double fpisin = args->fpisin;
-	typedef double(*matrix)[N + 1][N + 1];
-	matrix Matrix = (matrix)args->Matrix;
-	struct calculation_results *results = args->results;
-	int thread_num = args->thread_num;
-	pthread_barrier_t *inner_barrier = args->inner_barrier;
-	double *shared_maxresiduum = args->shared_maxresiduum;
-
-	int i, j;			/* local variables for loops */
-	int m1, m2;			/* used as indices for old and new matrices */
-	double star;		/* four times center value minus 4 neigh.b values */
-	double residuum;	/* residuum of current iteration */
+	int    i, j;        /* local variables for loops */
+	int    m1, m2;      /* used as indices for old and new matrices */
+	double star;        /* four times center value minus 4 neigh.b values */
+	double residuum;    /* residuum of current iteration */
 	double maxresiduum; /* maximum residuum value of a slave in iteration */
 
-	uint64_t stat_iteration = 0;
-	uint64_t term_iteration = options->term_iteration;
+	int const    N = arguments->N;
+	double const h = arguments->h;
+
+	double pih    = 0.0;
+	double fpisin = 0.0;
+
+	int term_iteration = options->term_iteration;
+
+	typedef double(*matrix)[N + 1][N + 1];
+
+	matrix Matrix = (matrix)arguments->M;
 
 	/* initialize m1 and m2 depending on algorithm */
 	if (options->method == METH_JACOBI)
@@ -405,23 +322,18 @@ calculate_t(void *data)
 		m2 = 0;
 	}
 
-	int count = N / options->number;
-	int remainder = N % options->number;
-	int lower = 1 + thread_num * count;
-	int upper = lower + count;
-
-	lower += thread_num < remainder ? thread_num : remainder;
-	upper += thread_num < remainder ? thread_num + 1 : remainder;
-
-	upper = (upper > N) ? N : upper;
-	upper = (count == 0) ? N : upper;
+	if (options->inf_func == FUNC_FPISIN)
+	{
+		pih    = M_PI * h;
+		fpisin = 0.25 * (2 * M_PI * M_PI) * h * h;
+	}
 
 	while (term_iteration > 0)
 	{
-		maxresiduum = 0.0;
+		maxresiduum = 0;
 
 		/* over all rows */
-		for (i = lower; i < upper; i++)
+		for (i = 1; i < N; i++)
 		{
 			double fpisin_i = 0.0;
 
@@ -442,8 +354,8 @@ calculate_t(void *data)
 
 				if (options->termination == TERM_PREC || term_iteration == 1)
 				{
-					residuum = Matrix[m2][i][j] - star;
-					residuum = fabs(residuum);
+					residuum    = Matrix[m2][i][j] - star;
+					residuum    = fabs(residuum);
 					maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
 				}
 
@@ -451,26 +363,17 @@ calculate_t(void *data)
 			}
 		}
 
-		if (options->termination == TERM_PREC || term_iteration == 1)
-			shared_maxresiduum[thread_num] = maxresiduum;
-		pthread_barrier_wait(inner_barrier);
-		if (options->termination == TERM_PREC || term_iteration == 1)
-		{
-			for (uint64_t k = 0; k < options->number; ++k)
-			{
-				maxresiduum = (shared_maxresiduum[k] < maxresiduum) ? maxresiduum : shared_maxresiduum[k];
-			}
-		}
+		results->stat_iteration++;
+		results->stat_precision = maxresiduum;
 
 		/* exchange m1 and m2 */
-		i = m1;
+		i  = m1;
 		m1 = m2;
 		m2 = i;
-		stat_iteration++;
+
 		/* check for stopping calculation depending on termination method */
 		if (options->termination == TERM_PREC)
 		{
-			pthread_barrier_wait(inner_barrier);
 			if (maxresiduum < options->term_precision)
 			{
 				term_iteration = 0;
@@ -481,58 +384,8 @@ calculate_t(void *data)
 			term_iteration--;
 		}
 	}
-	if (thread_num == 0)
-	{
-		results->m = m2;
-		results->stat_iteration = stat_iteration;
-		results->stat_precision = maxresiduum;
-	}
-	return NULL;
-}
 
-/* ************************************************************************ */
-/* calculate: solves the equation                                           */
-/* ************************************************************************ */
-static void
-calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
-{
-	int const    N = arguments->N;
-	double const h = arguments->h;
-
-	double pih    = 0.0;
-	double fpisin = 0.0;
-
-	if (options->inf_func == FUNC_FPISIN)
-	{
-		pih    = M_PI * h;
-		fpisin = 0.25 * (2 * M_PI * M_PI) * h * h;
-	}
-
-	struct shared_args args[options->number];
-	double shared_maxresiduum[options->number];
-
-	pthread_t threads[options->number];
-	pthread_barrier_t inner_barrier;
-	pthread_barrier_init(&inner_barrier, NULL, options->number);
-	for (uint64_t t = 0; t < options->number; ++t)
-	{
-		args[t].options = options;
-		args[t].N = N;
-		args[t].pih = pih;
-		args[t].fpisin = fpisin;
-		args[t].Matrix = arguments->M;
-		args[t].results = results;
-		args[t].thread_num = t;
-		args[t].inner_barrier = &inner_barrier;
-		args[t].shared_maxresiduum = (double *)&shared_maxresiduum;
-		
-		pthread_create(&threads[t], NULL, calculate_t, (void *)&args[t]);
-	}
-
-	for (uint64_t t = 0; t < options->number; ++t)
-	{
-		pthread_join(threads[t], NULL);
-	}
+	results->m = m2;
 }
 
 /* ************************************************************************ */
@@ -637,12 +490,6 @@ main(int argc, char** argv)
 
 	askParams(&options, argc, argv);
 
-	if (options.method == METH_GAUSS_SEIDEL)
-	{
-		printf("This version only works with Jacobi\n");
-		return 1;
-	}
-
 	initVariables(&arguments, &results, &options);
 
 	allocateMatrices(&arguments);
@@ -655,7 +502,7 @@ main(int argc, char** argv)
 	displayStatistics(&arguments, &results, &options);
 	displayMatrix(&arguments, &results, &options);
 
-	cleanup();
+	freeMatrices(&arguments);
 
 	return 0;
 }
