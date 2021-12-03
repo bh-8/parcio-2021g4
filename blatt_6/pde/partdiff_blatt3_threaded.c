@@ -400,11 +400,11 @@ calculate_t(void *data)
 	double *shared_maxresiduum = args->shared_maxresiduum;
 	struct calculation_arguments const *arguments = args->arguments;
 
-	int i, j;			/* local variables for loops */
-	int m1, m2;			/* used as indices for old and new matrices */
-	double star;		/* four times center value minus 4 neigh.b values */
-	double residuum;	/* residuum of current iteration */
-	double maxresiduum; /* maximum residuum value of a slave in iteration */
+	int i, j;			      /* local variables for loops */
+	int m1, m2;			      /* used as indices for old and new matrices */
+	double star;		      /* four times center value minus 4 neigh.b values */
+	double residuum;	      /* residuum of current iteration */
+	double maxresiduum = 0.0; /* maximum residuum value of a slave in iteration */
 
 	uint64_t stat_iteration = 0;
 	uint64_t term_iteration = options->term_iteration;
@@ -431,10 +431,11 @@ calculate_t(void *data)
 
 	upper = (upper > N) ? N : upper;
 	upper = (count == 0) ? N : upper;
-	maxresiduum = 0.0;
 
 	while (term_iteration > 0)
 	{
+		maxresiduum = 0.0;
+
 		/* over all rows */
 		for (i = lower; i < upper; i++)
 		{

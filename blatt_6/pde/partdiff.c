@@ -415,10 +415,11 @@ calculate_t(void *data)
 
 	upper = (upper > N) ? N : upper;
 	upper = (count == 0) ? N : upper;
-	maxresiduum = 0.0;
 
 	while (term_iteration > 0)
 	{
+		maxresiduum = 0.0;
+
 		/* over all rows */
 		for (i = lower; i < upper; i++)
 		{
