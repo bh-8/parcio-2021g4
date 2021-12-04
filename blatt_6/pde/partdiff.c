@@ -81,6 +81,14 @@ struct options
 	double   term_precision; /* terminate if precision reached */
 };
 
+struct init_args
+{
+	double* Matrix;
+	uint64_t thread_num;
+	struct options const* options;
+	int N;
+};
+
 struct shared_args
 {
 	double pih;
@@ -321,12 +329,41 @@ allocateMatrices(struct calculation_arguments* arguments)
 }
 
 /* ************************************************************************ */
+/* initMatrices_t: per-thread function to zero out the matrix               */
+/* ************************************************************************ */
+static void *
+initMatrices_t(void *data)
+{
+	struct init_args *args = (struct init_args *)data;
+	uint64_t num_threads = args->options->number;
+	uint64_t thread_num = args->thread_num;
+	uint64_t method = args->options->method;
+	size_t N = (size_t)args->N + 1;
+	N *= N;
+	N <<= method == METH_JACOBI ? 1 : 0;
+	double* Matrix = args->Matrix;
+
+	size_t count = N / num_threads;
+	size_t remainder = N % num_threads;
+	size_t lower = thread_num * count;
+	size_t upper = lower + count;
+
+	lower += thread_num < remainder ? thread_num : remainder;
+	upper += thread_num < remainder ? thread_num + 1 : remainder;
+
+	for (size_t i = lower; i < upper; ++i)
+		Matrix[i] = 0;
+
+	return NULL;
+}
+
+/* ************************************************************************ */
 /* initMatrices: Initialize matrix/matrices and some global variables       */
 /* ************************************************************************ */
 static void
 initMatrices(struct calculation_arguments* arguments, struct options const* options)
 {
-	uint64_t g, i, j; /* local variables for loops */
+	uint64_t g, i; /* local variables for loops */
 
 	uint64_t const N = arguments->N;
 	double const   h = arguments->h;
@@ -335,16 +372,22 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 
 	matrix Matrix = (matrix)arguments->M;
 
+	struct init_args t_args[options->number];
+	pthread_t threads[options->number];
+
 	/* initialize matrix/matrices with zeros */
-	for (g = 0; g < arguments->num_matrices; g++)
+	for (uint64_t t = 0; t < options->number; ++t)
 	{
-		for (i = 0; i <= N; i++)
-		{
-			for (j = 0; j <= N; j++)
-			{
-				Matrix[g][i][j] = 0.0;
-			}
-		}
+		t_args[t].Matrix = arguments->M;
+		t_args[t].N = N;
+		t_args[t].options = options;
+		t_args[t].thread_num = t;	
+		pthread_create(&threads[t], NULL, initMatrices_t, (void *)&t_args[t]);
+	}
+
+	for (uint64_t t = 0; t < options->number; ++t)
+	{
+		pthread_join(threads[t], NULL);
 	}
 
 	/* initialize borders, depending on function (function 2: nothing to do) */
