@@ -1,11 +1,12 @@
 # Parallele Programmierung 2021
-- [Arbeitsverzeichnis aktuelles Blatt](https://github.com/birne420/parcio-2021g4/tree/main/blatt_6)
+- [Arbeitsverzeichnis aktuelles Blatt](https://github.com/birne420/parcio-2021g4/tree/main/blatt_7)
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
+### Blatt 7
+- ...
 ### Blatt 6
 - Übungsblatt: [PP_2021_Uebung_06_POSIX_Threads-p-286.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_06_POSIX_Threads-p-286.pdf)
-  1. Parallelisierung mit POSIX Threads (300 Punkte)
-  2. Leistungsanalyse (120 Punkte)
+- Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_6/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
 ### Blatt 5
 - Übungsblatt: [PP_2021_Uebung_05_OpenMP-p-274.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_05_OpenMP-p-274.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_5/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
