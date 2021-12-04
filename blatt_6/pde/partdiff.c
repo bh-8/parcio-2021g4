@@ -405,15 +405,14 @@ calculate_t(void *data)
 		m2 = 0;
 	}
 
-	int count = N / options->number;
-	int remainder = N % options->number;
+	int count = (N - 1) / options->number;
+	int remainder = (N - 1) % options->number;
 	int lower = 1 + thread_num * count;
 	int upper = lower + count;
 
 	lower += thread_num < remainder ? thread_num : remainder;
 	upper += thread_num < remainder ? thread_num + 1 : remainder;
 
-	upper = (upper > N) ? N : upper;
 	upper = (count == 0) ? N : upper;
 
 	while (term_iteration > 0)
