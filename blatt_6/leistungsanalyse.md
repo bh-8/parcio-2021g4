@@ -1,13 +1,18 @@
+# Parallelisierung mit POSIX Threads
+Wir haben mehrere Versionen von `partdiff` parallelisiert. Die Version in `partdiff.c` basiert zum Teil auf denen mit OpenMP parallelisierten der vorherigen Blätter. In `partdiff_blatt3_threaded.c` wurde die innere Schleife unserer optimierten Variante von Blatt 3, welche interessante Perfomancecharakteristiken aufwies, in `partdiff.c` eingefügt.
+
+Die Arbeitszeit, um zu einem lauffähigen Programm zu kommen, lag bei ungefähr sechs Stunden, plus zwei Stunden Bug-Jagd und -fixing.
+
 # Leistungsanalyse
 ## Ausgangsvergleich mehrerer Versionen
-Wir hatten mehrere Versionen des Programmes geschrieben und wollten zunächst herausfinden, welche die schnellste ist. Zusätzlich sollten noch Clang und gcc miteinander verglichen werden. Alle Benchmarks wurden mit 4096 Interlines und 19 Iterationen ausgeführt.
+Wir hatten mehrere Versionen des Programmes geschrieben und wollten zunächst herausfinden, welche die schnellste ist. Zusätzlich sollten noch Clang und gcc miteinander verglichen werden. Alle Benchmarks wurden mit 4096 Interlines und 19 Iterationen auf `ant14` ausgeführt.
 - Säulendiagamm:
   ![Vergleich](pdf_attachment/bench0.svg)
 
 Fast alle Versionen des Programmes verhalten sich ähnlich, so dass ihr Speedup mit zunehmender Threadanzahl langsamer wächst. Nur die Variante `partdiff_blatt3_threaded` erreicht einen besonders großen Speedup mit dem gcc-Compiler, allerdings wächst dieser auch zunehmend langsamer mit der Threadanzahl.
 
 ## Laufzeiten abhängig von Threadanzahl (4096 Interlines)
-Im Nachfolgenden wird die Laufzeit der `partdiff_blatt3_threaded`-Variante mit dem gcc-Compiler anhand der Threadanzahl verglichen. Hier wurden jetzt 109 Iterationen verwendet, um auf die Mindestlaufzeit von 30s zu kommen. Da sich bei der Erhöhung der Iterationen der parallele Anteil des Programms erhöht, läuft das Programm pro Iteration schneller.
+Im Nachfolgenden wird die Laufzeit der `partdiff_blatt3_threaded`-Variante mit dem gcc-Compiler anhand der Threadanzahl verglichen. Hier wurden jetzt 109 Iterationen verwendet, um auf die Mindestlaufzeit von 30s zu kommen. Da sich bei der Erhöhung der Iterationen der parallele Anteil des Programms erhöht, läuft das Programm pro Iteration schneller. Hier wurde `ant15` verwendet, welche allerdings die gleiche Hardwarekonfiguration hat wie `ant14`.
 - Säulendiagramm:
   ![Laufzeiten 1](pdf_attachment/bench1_bar.svg)
 - Liniendiagramm:
@@ -15,7 +20,7 @@ Im Nachfolgenden wird die Laufzeit der `partdiff_blatt3_threaded`-Variante mit d
 - Auswertung:
   + ~1-6 Threads: bei kleiner Threadanzahl halbiert sich die Ausführungszeit bei Verdopplung der Threadanzahl noch nahezu
   + ~6-10 Threads: Speedup nimmt deutlich ab
-  + ~10+ Threads: keine nennenswerte Geschwindigkeitsverbesserung
+  + ~10+ Threads: keine nennenswerte Geschwindigkeitsverbesserung bzw. sogar Verschlechterung
 ## Hardwarekonfiguration
 - Geben Sie die für die Messungen verwendete Hardwarekonfiguration (Prozessor, Anzahl der Kerne, Größe des Arbeitsspeichers etc.) an
 ### Ant14
