@@ -384,11 +384,11 @@ calculate_t(void *data)
 	pthread_barrier_t *inner_barrier = args->inner_barrier;
 	double *shared_maxresiduum = args->shared_maxresiduum;
 
-	int i, j;			/* local variables for loops */
-	int m1, m2;			/* used as indices for old and new matrices */
-	double star;		/* four times center value minus 4 neigh.b values */
-	double residuum;	/* residuum of current iteration */
-	double maxresiduum; /* maximum residuum value of a slave in iteration */
+	int i, j;			      /* local variables for loops */
+	int m1, m2;			      /* used as indices for old and new matrices */
+	double star;		      /* four times center value minus 4 neigh.b values */
+	double residuum;	      /* residuum of current iteration */
+	double maxresiduum = 0.0; /* maximum residuum value of a slave in iteration */
 
 	uint64_t stat_iteration = 0;
 	uint64_t term_iteration = options->term_iteration;
