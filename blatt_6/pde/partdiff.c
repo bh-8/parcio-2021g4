@@ -413,8 +413,6 @@ calculate_t(void *data)
 	lower += thread_num < remainder ? thread_num : remainder;
 	upper += thread_num < remainder ? thread_num + 1 : remainder;
 
-	upper = (count == 0) ? N : upper;
-
 	while (term_iteration > 0)
 	{
 		maxresiduum = 0.0;
@@ -643,6 +641,9 @@ main(int argc, char** argv)
 	}
 
 	initVariables(&arguments, &results, &options);
+
+	if (options.number > arguments.N)
+		options.number = 1;
 
 	allocateMatrices(&arguments);
 	initMatrices(&arguments, &options);
