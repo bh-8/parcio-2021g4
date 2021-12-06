@@ -4,7 +4,7 @@
 ---
 ### Blatt 7 - MPI-Einführung
 - Übungsblatt: [PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf)
-- Abgabe: ausstehend
+- Abgabe: ausstehend (fällig 11.12.2021, 23:59)
 - Bewertung: ausstehend
 ### Blatt 6 - Parallelisierung mit POSIX Threads
 - Übungsblatt: [PP_2021_Uebung_06_POSIX_Threads-p-286.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_06_POSIX_Threads-p-286.pdf)
