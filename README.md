@@ -3,7 +3,7 @@
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
 ### Blatt 7 - MPI-Einführung
-- Übungsblatt: ausstehend
+- Übungsblatt: [PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf)
 - Abgabe: ausstehend
 - Bewertung: ausstehend
 ### Blatt 6 - Parallelisierung mit POSIX Threads
