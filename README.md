@@ -9,7 +9,7 @@
 ### Blatt 6 - Parallelisierung mit POSIX Threads
 - Übungsblatt: [PP_2021_Uebung_06_POSIX_Threads-p-286.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_06_POSIX_Threads-p-286.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_6/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
-- Bewertung: ausstehend
+- Bewertung: [bewertung.pdf](https://github.com/birne420/parcio-2021g4/blob/main/blatt_6/_abgabe/bewertung.pdf?raw=true) (435/420)
 ### Blatt 5 - Parallelisierung mit OpenMP
 - Übungsblatt: [PP_2021_Uebung_05_OpenMP-p-274.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_05_OpenMP-p-274.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_5/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
