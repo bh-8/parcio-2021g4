@@ -21,7 +21,7 @@ int main() {
     t_micros = t_value.tv_usec;
 	
     t_formatting = localtime(&t_seconds);
-    strftime(t_string, sizeof(t_string), "%Y-%m-%d_%H:%M:%S_", t_formatting);
+    strftime(t_string, sizeof(t_string), "%Y-%m-%d %H:%M:%S.", t_formatting);
 	
     printf("%s: %s%d\n", h_string, t_string, t_micros);
     return 0;
