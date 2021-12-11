@@ -1,4 +1,5 @@
 #define _DEFAULT_SOURCE
+#define _MPI_BUFFER_SIZE 256
 
 #include <stdio.h>
 #include <unistd.h>
@@ -13,15 +14,13 @@ int main() {
     int size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    printf("Rank: %d\n", rank);
 
-    if(rank == 0) {
-        //Rank is zero
-
-        //TODO: Receive strings and print minimum micro seconds
-    } else {
-        //Rank 1 to n
-        char h_string[256];
+	//Message buffer
+	char str[_MPI_BUFFER_SIZE];
+	
+    if(rank != 0) {
+		//Rank 1 to n
+        char h_string[64];
         
         struct timeval t_value;
         time_t t_seconds;
@@ -38,9 +37,21 @@ int main() {
         t_formatting = localtime(&t_seconds);
         strftime(t_string, sizeof(t_string), "%Y-%m-%d %H:%M:%S.", t_formatting);
 
-        //TODO: Send following string to rank 0
-        printf("%s: %s%d\n", h_string, t_string, t_micros);
+        //Send following string to rank 0
+        snprintf(str, _MPI_BUFFER_SIZE, "%s: %s%d\n", h_string, t_string, t_micros);
+		MPI_Send(&str, _MPI_BUFFER_SIZE, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+    } else {
+        //Rank is zero
+		
+        //Receive strings and print
+		for(int i = 1; i < size; i++) {
+			MPI_Recv(&str, _MPI_BUFFER_SIZE, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			printf(str);
+		}
     }
+	
+	MPI_Barrier(MPI_COMM_WORLD);
+	printf("Rang %d beendet jetzt!\n", rank);
 
     MPI_Finalize();
 
