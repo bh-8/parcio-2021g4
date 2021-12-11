@@ -7,6 +7,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <mpi.h>
+#include <limits.h>
 
 int main() {
     MPI_Init(NULL, NULL);
@@ -25,7 +26,7 @@ int main() {
         
         struct timeval t_value;
         time_t t_seconds;
-        int t_micros;
+        long int t_micros;
         struct tm *t_formatting;
         char t_string[64];
         
@@ -39,9 +40,9 @@ int main() {
         strftime(t_string, sizeof(t_string), "%Y-%m-%d %H:%M:%S.", t_formatting);
 
         //Send following string/micros to rank 0
-        snprintf(str, _MPI_BUFFER_SIZE, "%s: %s%d\n", h_string, t_string, t_micros);
+        snprintf(str, _MPI_BUFFER_SIZE, "%s: %s%ld\n", h_string, t_string, t_micros);
 		MPI_Send(&str, _MPI_BUFFER_SIZE, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-		MPI_Reduce(&t_micros, NULL, 1, MPI_INT, _MPI_REDUCTION_MICROS, 0, MPI_COMM_WORLD);
+		MPI_Reduce(&t_micros, NULL, 1, MPI_LONG, _MPI_REDUCTION_MICROS, 0, MPI_COMM_WORLD);
     } else {
         //Rank is zero
 		
@@ -56,9 +57,9 @@ int main() {
 	
 	//Receive minimum micros
 	if(rank == 0) {
-		int recv_buf;
-		MPI_Reduce(MPI_IN_PLACE, &recv_buf, 1, MPI_INT, _MPI_REDUCTION_MICROS, 0, MPI_COMM_WORLD);
-		printf("%d\n", recv_buf);
+		long int recv_buf = LONG_MAX;
+		MPI_Reduce(MPI_IN_PLACE, &recv_buf, 1, MPI_LONG, _MPI_REDUCTION_MICROS, 0, MPI_COMM_WORLD);
+		printf("%ld\n", recv_buf);
 	}
 	printf("Rang %d beendet jetzt!\n", rank);
 
