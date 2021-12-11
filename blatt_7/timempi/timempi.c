@@ -1,5 +1,6 @@
 #define _DEFAULT_SOURCE
 #define _MPI_BUFFER_SIZE 256
+#define _MPI_REDUCTION_MICROS MPI_MIN
 
 #include <stdio.h>
 #include <unistd.h>
@@ -37,9 +38,10 @@ int main() {
         t_formatting = localtime(&t_seconds);
         strftime(t_string, sizeof(t_string), "%Y-%m-%d %H:%M:%S.", t_formatting);
 
-        //Send following string to rank 0
+        //Send following string/micros to rank 0
         snprintf(str, _MPI_BUFFER_SIZE, "%s: %s%d\n", h_string, t_string, t_micros);
 		MPI_Send(&str, _MPI_BUFFER_SIZE, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+		MPI_Reduce(&t_micros, NULL, 1, MPI_INT, _MPI_REDUCTION_MICROS, 0, MPI_COMM_WORLD);
     } else {
         //Rank is zero
 		
@@ -51,6 +53,13 @@ int main() {
     }
 	
 	MPI_Barrier(MPI_COMM_WORLD);
+	
+	//Receive minimum micros
+	if(rank == 0) {
+		int recv_buf;
+		MPI_Reduce(MPI_IN_PLACE, &recv_buf, 1, MPI_INT, _MPI_REDUCTION_MICROS, 0, MPI_COMM_WORLD);
+		printf("%d\n", recv_buf);
+	}
 	printf("Rang %d beendet jetzt!\n", rank);
 
     MPI_Finalize();
