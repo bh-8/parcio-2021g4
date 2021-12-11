@@ -1,13 +1,23 @@
 Die Bearbeitungszeit bitte in ganzen Stunden angeben (aufrunden).
 In den restlichen Zeilen jeweils ein X in der zutreffenden Spalte setzen.
 
-Bearbeitungszeit:  
-Schwierigkeit:     [ ] zu leicht         [ ] genau richtig     [ ] zu schwer
-Lehrreich:         [ ] wenig             [ ] etwas             [ ] sehr
-Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [ ] verständlich
+Bearbeitungszeit:  4h
+Schwierigkeit:     [ ] zu leicht         [X] genau richtig     [ ] zu schwer
+Lehrreich:         [ ] wenig             [ ] etwas             [X] sehr
+Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [X] verständlich
 
 Kommentar:
 Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen?
+	-
+
 Was war zu schwer oder unverständlich?
+	Aufgabe 2:
+	Es war unklar, wie mit dem Rest umgegangen werden soll, wenn sich das
+	Array nicht genau auf die Prozesse verteilen lässt.
+	Wir haben die übrigen Werte 0 gesetzt. (bool zeroLast)
+
 Was könnten wir verbessern?
+	-
+
 Was hat Ihnen besonders gut gefallen?
+	schönes Blatt :)
