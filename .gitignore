@@ -1,7 +1,5 @@
 *.o
-blatt_?/**/partdiff
-blatt_?/**/partdiff_orig
-blatt_?/**/partdiff_blatt3_threaded
+blatt_?/**/partdiff*
 blatt_?/timempi/timempi
 blatt_?/circle/circle*
 !*.c
