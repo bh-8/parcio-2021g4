@@ -132,7 +132,6 @@ main(int argc, char** argv)
 
 	// Array length
 	// TODO: Proper input validation, maybe
-	// TODO: How to divide the array when there are more processes than its len
 	N   = atoi(argv[1]);
 	int count = N / size;
 	int remainder = N % size;
