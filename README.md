@@ -2,6 +2,14 @@
 - [Arbeitsverzeichnis aktuelles Blatt](https://github.com/birne420/parcio-2021g4/tree/main/blatt_7)
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
+### Blatt 9 - Parallelisierung mit MPI (Gauß-Seidel)
+- Übungsblatt: ausstehend
+- Abgabe: ausstehend
+- Bewertung: ausstehend
+### Blatt 8 - Parallelisierung mit MPI (Jacobi)
+- Übungsblatt: ausstehend
+- Abgabe: ausstehend
+- Bewertung: ausstehend
 ### Blatt 7 - MPI-Einführung
 - Übungsblatt: [PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_7/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
