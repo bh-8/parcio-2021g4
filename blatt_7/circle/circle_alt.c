@@ -24,7 +24,6 @@ init(int N, int maxsize, int rank)
 int
 circle(int* buf, int rank, int size, int N)
 {
-	// TODO
 	int follower = (rank + 1) % size;
 	int previous = (rank - 1) < 0 ? size - 1 : rank - 1;
 	int last = -1;
