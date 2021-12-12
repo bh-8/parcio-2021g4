@@ -123,16 +123,23 @@ main(int argc, char** argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-	if (argc < 2)
+	if (argc < 2 && rank == 0)
 	{
-		if (rank == 0)
 			printf("Arguments error!\nPlease specify a buffer size.\n");
-		return EXIT_FAILURE;
+			MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
 	}
 
+	N = atoi(argv[1]);
+
+	if (N == 0 && rank == 0)
+	{
+		printf("Arguments error!\nPlease specify a valid integer greater than zero as the first argument.\n");
+		MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
 	// Array length
-	// TODO: Proper input validation, maybe
-	N   = atoi(argv[1]);
 	int count = N / size;
 	int remainder = N % size;
 	N = count;
