@@ -13,10 +13,10 @@ init(int N, int maxsize, int rank)
 	srand(time(NULL) ^ (long)rank);
 
 	for (int i = 0; i < N; i++)
-	{
-		// Do not modify "% 25"
 		buf[i] = rand() % 25;
-	}
+
+	for (int i = N; i < maxsize; ++i)
+		buf[i] = -1;
 
 	return buf;
 }
