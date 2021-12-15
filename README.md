@@ -8,7 +8,7 @@
 - Bewertung: ausstehend
 ### Blatt 8 - Parallelisierung mit MPI (Jacobi)
 - Übungsblatt: [PP_2021_Uebung_08_MPI_Jacobi-p-306.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_08_MPI_Jacobi-p-306.pdf)
-  1. Parallelisierung mit MPI (300 Punkte)
+  1. **Parallelisierung mit MPI (300 Punkte)**
     - Jacobi-Verfahren mit Abbruch nach fester Iterationszahl
     - Jacobi-Verfahren mit Abbruch nach Genauigkeit
     - das Programm darf nicht langsamer als die serielle Variante sein
@@ -17,11 +17,11 @@
     - das Programm muss mit beliebigen Prozesszahlen funktionieren
     - erstellen Sie eine eigene Funktion für die MPI-Parallelisierung des Jacobi-Verfahrens
     - Hinweis: Sie können die in den Materialien bereitgestellte `displayMatrixMpi`-Funktion als Grundlage für die parallele Ausgabe der Matrix benutzen
-  2. Leistungsanalyse (120 Punkte)
+  2. **Leistungsanalyse (120 Punkte)**
     - ermitteln Sie die Leistungsdaten Ihres Programms und visualisieren Sie die Laufzeiten in einem Diagramm
     - vergleichen Sie außerdem ihr Programm mit der ursprünglichen seriellen Variante
     - visualisieren Sie alle Ergebnisse in hinreichend beschrifteten Diagrammen; schreiben Sie ca. eine viertel Seite Interpretation zu diesen Ergebnissen
-  3. Hybride Parallelisierung (90 Bonuspunkte)
+  3. **Hybride Parallelisierung (90 Bonuspunkte)**
     - ermitteln Sie die Leistungsdaten Ihres Hybrid-Programms und vergleichen Sie die Laufzeiten in einem Diagramm
     - wiederholen Sie dabei jede Messung mindestens drei Mal, um aussagekräftige Mittelwerte bilden zu können
     - schreiben Sie eine halbe Seite Interpretation zu diesen Ergebnissen
