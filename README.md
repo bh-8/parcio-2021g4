@@ -58,3 +58,4 @@
 ---
 # Gesamtpunktzahl
 - 2,377 / 2,320 (102.45%)
+- Stand inkl. Blatt 7
