@@ -30,7 +30,7 @@
 ### Blatt 7 - MPI-Einführung
 - Übungsblatt: [PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_7/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
-- Bewertung: ausstehend
+- Bewertung: [bewertung.pdf](https://github.com/birne420/parcio-2021g4/blob/main/blatt_7/_abgabe/bewertung.pdf?raw=true) (305/300)
 ### Blatt 6 - Parallelisierung mit POSIX Threads
 - Übungsblatt: [PP_2021_Uebung_06_POSIX_Threads-p-286.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_06_POSIX_Threads-p-286.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_6/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
