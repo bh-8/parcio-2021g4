@@ -55,3 +55,6 @@
 - Übungsblatt: [PP_2021_Uebung_01_Einfuehrung-p-240.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_01_Einfuehrung-p-240.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_1/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
 - Bewertung: [bewertung.pdf](https://github.com/birne420/parcio-2021g4/blob/main/blatt_1/_abgabe/bewertung.pdf?raw=true) (235/210)
+---
+# Gesamtpunktzahl
+- 2,377 / 2,320 (102.45%)
