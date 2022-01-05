@@ -56,25 +56,28 @@
 #define TERM_PREC         1
 #define TERM_ITER         2
 
-struct calculation_arguments {
-	uint64_t rank;         /* current mpi rank */
-	uint64_t size;         /* mpi process count */
-	uint64_t memPerLine;   /* memory per interline */
-	uint64_t linesPerProc; /* how many interlines per process */
-	
+struct calculation_arguments
+{
 	uint64_t N;            /* number of spaces between lines (lines=N+1) */
 	uint64_t num_matrices; /* number of matrices */
 	double   h;            /* length of a space between two lines */
 	double*  M;            /* two matrices with real values */
+	
+	int R; //store mpi rank
+	int S; //store mpi size
+	
+	uint64_t matrixSize; //stores mpi process matrix size
 };
 
-struct calculation_results {
+struct calculation_results
+{
 	uint64_t m;
 	uint64_t stat_iteration; /* number of current iteration */
 	double   stat_precision; /* actual precision of all slaves in iteration */
 };
 
-struct options {
+struct options
+{
 	uint64_t number;         /* Number of threads */
 	uint64_t method;         /* Gauss Seidel or Jacobi method of iteration */
 	uint64_t interlines;     /* matrix size = interlines*8+9 */
@@ -84,15 +87,17 @@ struct options {
 	double   term_precision; /* terminate if precision reached */
 };
 
-struct init_args {
+struct init_args
+{
 	double* Matrix;
 	uint64_t thread_num;
 	struct options const* options;
-	int N;
-	int L;
+	uint64_t lineWidth; //line width
+	uint64_t procLines; //matrix lines per process
 };
 
-struct shared_args {
+struct shared_args
+{
 	double* Matrix;
 	double* shared_maxresiduum;
 	uint64_t thread_num;
@@ -103,7 +108,8 @@ struct shared_args {
 	int N;
 };
 
-struct vector {
+struct vector
+{
 	size_t** buf;
 	size_t size;
 	size_t max_size;
@@ -121,7 +127,9 @@ struct timeval start_time; /* time when program started */
 struct timeval comp_time;  /* time when calculation completed */
 struct vector allocated_memory;
 
-static void usage(char* name) {
+static void
+usage(char* name)
+{
 	printf("Usage: %s [num] [method] [lines] [func] [term] [prec/iter]\n", name);
 	printf("\n");
 	printf("  - num:       number of threads (1 .. %d)\n", MAX_THREADS);
@@ -143,7 +151,9 @@ static void usage(char* name) {
 	printf("Example: %s 1 2 100 1 2 100 \n", name);
 }
 
-static void askParams(struct options* options, int argc, char** argv) {
+static void
+askParams(struct options* options, int argc, char** argv)
+{
 	int ret;
 
 	if (argc < 7 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-?") == 0)
@@ -221,22 +231,26 @@ static void askParams(struct options* options, int argc, char** argv) {
 /* ************************************************************************ */
 /* initVariables: Initializes some global variables                         */
 /* ************************************************************************ */
-static void initVariables(struct calculation_arguments* arguments, struct calculation_results* results, struct options const* options, uint64_t rank, uint64_t size) {
-	arguments->rank         = rank;
-	arguments->size         = size;
+static void
+initVariables(struct calculation_arguments* arguments, struct calculation_results* results, struct options const* options, int R, int S)
+{
+	arguments->R            = R; //store mpi rank
+	arguments->S            = S; //store mpi size
+	
+	printf("[MPI-DEBUG] R=%d, S=%d\n", R, S);
 	
 	arguments->N            = (options->interlines * 8) + 9 - 1;
 	arguments->num_matrices = (options->method == METH_JACOBI) ? 2 : 1;
 	arguments->h            = 1.0 / arguments->N;
 	
-	arguments->memPerLine   = (arguments->N + 1) * sizeof(double); //memory needed per line
-	arguments->linesPerProc = (arguments->N + 1) / size; //lines per process
-	uint64_t const rem      = (arguments->N + 1) % size; //remainder
-	if(rank == size - 1) {
-		arguments->linesPerProc += rem; //add remaining lines on last process
+	arguments->lineWidth    = arguments->N + 1;
+	arguments->procLines    = (arguments->N + 1) / S;
+	int const procLinesRem  = (arguments->N + 1) % S;
+	if(R == S - 1) {
+		arguments->procLines += procLinesRem;
 	}
-	printf("[DEBUG_PRINT] MPI rank/size: %u/%u\n", (unsigned int)rank, (unsigned int)size);
-	printf("[DEBUG_PRINT] MPI linesPerProc: %u\n", (unsigned int)arguments->linesPerProc);
+	
+	printf("[MPI-DEBUG] lineWidth=%u procLines=%u\n", (unsigned int)arguments->lineWidth, (unsigned int)arguments->procLines);
 
 	results->m              = 0;
 	results->stat_iteration = 0;
@@ -246,7 +260,8 @@ static void initVariables(struct calculation_arguments* arguments, struct calcul
 /* ************************************************************************ */
 /* cleanup: frees all allocated memory                                      */
 /* ************************************************************************ */
-static inline void cleanup() {
+static inline void
+cleanup() {
 	for (void* p = pop(); p != NULL; p = pop())
 		free(p);
 	free(allocated_memory.buf);
@@ -256,7 +271,9 @@ static inline void cleanup() {
 /* allocateMemory ()                                                        */
 /* allocates memory and quits if there was a memory allocation problem      */
 /* ************************************************************************ */
-static void * allocateMemory(size_t size) {
+static void*
+allocateMemory(size_t size)
+{
 	void* p;
 
 	if ((p = malloc(size)) == NULL)
@@ -274,7 +291,9 @@ static void * allocateMemory(size_t size) {
 /* ************************************************************************ */
 /* push: push a pointer into the vector                                     */
 /* ************************************************************************ */
-static void push(void* data) {
+static void
+push(void* data)
+{
 	if (allocated_memory.max_size == 0)
 	{
 		if ((allocated_memory.buf = malloc(sizeof(size_t*) << 3)) ==
@@ -308,7 +327,9 @@ static void push(void* data) {
 /* ************************************************************************ */
 /* pop: pop a pointer from the vector, return NULL if empty                 */
 /* ************************************************************************ */
-static void * pop() {
+static void*
+pop()
+{
 	if (allocated_memory.size == 0)
 		return NULL;
 	void* p = allocated_memory.buf[--(allocated_memory.size)];
@@ -319,26 +340,28 @@ static void * pop() {
 /* ************************************************************************ */
 /* allocateMatrices: allocates memory for matrices                          */
 /* ************************************************************************ */
-static void allocateMatrices(struct calculation_arguments* arguments) {
-	arguments->M = allocateMemory(arguments->num_matrices * arguments->memPerLine * arguments->linesPerProc);
+static void
+allocateMatrices(struct calculation_arguments* arguments)
+{
+	arguments->M = allocateMemory(arguments->num_matrices * arguments->procLines * arguments->lineWidth * sizeof(double));
 }
 
 /* ************************************************************************ */
 /* initMatrices_t: per-thread function to zero out the matrix               */
 /* ************************************************************************ */
-static void * initMatrices_t(void *data) {
+static void *
+initMatrices_t(void *data)
+{
 	struct init_args *args = (struct init_args *)data;
 	uint64_t num_threads = args->options->number;
 	uint64_t thread_num = args->thread_num;
 	uint64_t method = args->options->method;
-	size_t N = (size_t)args->N + 1;
-	size_t L = (size_t)args->L;
-	N = N * L;
-	N <<= method == METH_JACOBI ? 1 : 0;
+	uint64_t matrixSize = args->matrixSize;
+	matrixSize <<= method == METH_JACOBI ? 1 : 0;
 	double* Matrix = args->Matrix;
 
-	size_t count = N / num_threads;
-	size_t remainder = N % num_threads;
+	size_t count = matrixSize / num_threads;
+	size_t remainder = matrixSize % num_threads;
 	size_t lower = thread_num * count;
 	size_t upper = lower + count;
 
@@ -354,13 +377,16 @@ static void * initMatrices_t(void *data) {
 /* ************************************************************************ */
 /* initMatrices: Initialize matrix/matrices and some global variables       */
 /* ************************************************************************ */
-static void initMatrices(struct calculation_arguments* arguments, struct options const* options) {
+static void
+initMatrices(struct calculation_arguments* arguments, struct options const* options)
+{
 	uint64_t g, i; /* local variables for loops */
 
 	uint64_t const N = arguments->N;
 	double const   h = arguments->h;
+	uint64_t const matrixSize = arguments->lineWidth * arguments->procLines;
 
-	typedef double(*matrix)[N + 1][arguments->linesPerProc];
+	typedef double(*matrix)[arguments->procLines][arguments->lineWidth];
 
 	matrix Matrix = (matrix)arguments->M;
 
@@ -371,10 +397,9 @@ static void initMatrices(struct calculation_arguments* arguments, struct options
 	for (uint64_t t = 0; t < options->number; ++t)
 	{
 		t_args[t].Matrix = arguments->M;
-		t_args[t].N = N;
+		t_args[t].matrixSize = matrixSize;
 		t_args[t].options = options;
 		t_args[t].thread_num = t;
-		t_args[t].L = arguments->linesPerProc;
 		pthread_create(&threads[t], NULL, initMatrices_t, (void *)&t_args[t]);
 	}
 
@@ -383,24 +408,28 @@ static void initMatrices(struct calculation_arguments* arguments, struct options
 		pthread_join(threads[t], NULL);
 	}
 
+	//TODO code below will probably not work... (FUNC_F0)
 	/* initialize borders, depending on function (function 2: nothing to do) */
-	if (options->inf_func == FUNC_F0) {
-		for (g = 0; g < arguments->num_matrices; g++) {
-			if(arguments->rank == 0) {
-				for (i = 0; i <= N; i++) {
-					Matrix[g][i][0] = 1.0 - (h * i);
+	if (options->inf_func == FUNC_F0)
+	{
+		for (g = 0; g < arguments->num_matrices; g++)
+		{
+			for (i = 0; i <= arguments->procLines; i++)
+			{
+				Matrix[g][i][0] = 1.0 - (h * i); //left...
+				Matrix[g][i][arguments->lineWidth - 1] = h * i; //right...
+				if(arguments->R == 0) {
+					for(int x = 0; x < arguments->lineWidth; x++) {
+						Matrix[g][0][x] = 1.0 - (h * i); //top...
+					}
+					Matrix[g][0][arguments->lineWidth] = 0.0; //top right...
 				}
-				Matrix[g][N][0] = 0.0;
-			}
-			if(arguments->rank == arguments->size - 1) {
-				for (i = 0; i <= N; i++) {
-					Matrix[g][i][arguments->linesPerProc - 1] = h * i;
+				if(arguments->R == arguments->S - 1) {
+					for(int x = 0; x < arguments->lineWidth; x++) {
+						Matrix[g][arguments->procLines][x] = h * i; //bottom...
+					}
+					Matrix[g][arguments->procLines][0] = 0.0; //bottom left...
 				}
-				Matrix[g][0][arguments->linesPerProc - 1] = 0.0;
-			}
-			for (i = 0; i < arguments->linesPerProc; i++) {
-				Matrix[g][0][i] = 1.0 - (h * i);
-				Matrix[g][N][i] = h * i;
 			}
 		}
 	}
@@ -409,8 +438,11 @@ static void initMatrices(struct calculation_arguments* arguments, struct options
 /* ************************************************************************ */
 /* calculate_func: calculates the interference function                     */
 /* ************************************************************************ */
-static inline double calculate_func(struct calculation_arguments const* arguments, struct options const* options, int i, int j) {
+static inline double
+calculate_func(struct calculation_arguments const* arguments, struct options const* options, int i, int j)
+{
 	double const h = arguments->h;
+
 	if (options->inf_func == FUNC_FPISIN)
 	{
 		return ((2 * M_PI * M_PI) * h * h * sin(M_PI * h * (double)i) * sin(M_PI * h * (double)j)) / 4;
@@ -424,7 +456,9 @@ static inline double calculate_func(struct calculation_arguments const* argument
 /* ************************************************************************ */
 /* calculate_t: gets run by each thread to solve the equation               */
 /* ************************************************************************ */
-static void * calculate_t(void *data) {
+static void *
+calculate_t(void *data)
+{
 	struct shared_args *args = (struct shared_args *)data;
 	struct options const *options = args->options;
 	int const N = args->N;
@@ -529,7 +563,9 @@ static void * calculate_t(void *data) {
 /* ************************************************************************ */
 /* calculate: solves the equation                                           */
 /* ************************************************************************ */
-static void calculate(struct calculation_arguments const *arguments, struct calculation_results *results, struct options const *options) {
+static void
+calculate(struct calculation_arguments const *arguments, struct calculation_results *results, struct options const *options)
+{
 	int const N = arguments->N;
 
 	struct shared_args args[options->number];
@@ -561,7 +597,9 @@ static void calculate(struct calculation_arguments const *arguments, struct calc
 /* ************************************************************************ */
 /*  displayStatistics: displays some statistics about the calculation       */
 /* ************************************************************************ */
-static void displayStatistics(struct calculation_arguments const* arguments, struct calculation_results const* results, struct options const* options) {
+static void
+displayStatistics(struct calculation_arguments const* arguments, struct calculation_results const* results, struct options const* options)
+{
 	int    N    = arguments->N;
 	double time = (comp_time.tv_sec - start_time.tv_sec) + (comp_time.tv_usec - start_time.tv_usec) * 1e-6;
 
@@ -619,13 +657,15 @@ static void displayStatistics(struct calculation_arguments const* arguments, str
 /** ausgegeben wird. Aus der Matrix werden die Randzeilen/-spalten sowie   **/
 /** sieben Zwischenzeilen ausgegeben.                                      **/
 /****************************************************************************/
-static void displayMatrix(struct calculation_arguments* arguments, struct calculation_results* results, struct options* options) {
+static void
+displayMatrix(struct calculation_arguments* arguments, struct calculation_results* results, struct options* options)
+{
 	int x, y;
 
 	int const interlines = options->interlines;
 	int const N          = arguments->N;
 
-	typedef double(*matrix)[N + 1][arguments->linesPerProc];
+	typedef double(*matrix)[N + 1][N + 1];
 
 	matrix Matrix = (matrix)arguments->M;
 
@@ -647,14 +687,16 @@ static void displayMatrix(struct calculation_arguments* arguments, struct calcul
 /* ************************************************************************ */
 /*  main                                                                    */
 /* ************************************************************************ */
-int main(int argc, char** argv) {
+int
+main(int argc, char** argv)
+{
 	//MPI Init
 	MPI_Init(&argc, &argv);
 	
-	int rank;
-	int size;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
+	int R; //store mpi rank
+	int S; //store mpi size
+	MPI_Comm_rank(MPI_COMM_WORLD, &R);
+    MPI_Comm_size(MPI_COMM_WORLD, &S);
 	
 	struct options               options;
 	struct calculation_arguments arguments;
@@ -667,25 +709,25 @@ int main(int argc, char** argv) {
 		printf("This version only works with Jacobi\n");
 		return 1;
 	}
-
-	initVariables(&arguments, &results, &options, rank, size);
+	
+	initVariables(&arguments, &results, &options, R, S);
 
 	if (options.number > arguments.N)
 		options.number = 1;
-
+	
 	allocateMatrices(&arguments);
 	initMatrices(&arguments, &options);
 
 	gettimeofday(&start_time, NULL);
-	calculate(&arguments, &results, &options); //MPI-TODO!!!
+	//////////////////////////////////////////////////
+	//TODO: continue mpi implementation...
+	calculate(&arguments, &results, &options);
 	gettimeofday(&comp_time, NULL);
 
 	displayStatistics(&arguments, &results, &options);
 	displayMatrix(&arguments, &results, &options);
 
 	cleanup();
-	
-	//MPI Final
 	MPI_Finalize();
 
 	return 0;
