@@ -3,7 +3,7 @@ CFLAGSMPICC = -std=c11 -Wall -Wextra -Wpedantic -O3 -g -fopenmp
 GCC = gcc
 MPICC = mpicc
 
-all: threaded
+all: mpi threaded
 
 threaded:
 	$(GCC) $(CFLAGSGCC) -c -o partdiff_blatt3_threaded.o partdiff_blatt3_threaded.c
