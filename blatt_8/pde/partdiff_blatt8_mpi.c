@@ -69,6 +69,9 @@ struct calculation_arguments
 	uint64_t matrixSize; //stores mpi process matrix size
 	uint64_t matrixFrom; //stores the global index of the first line
 	uint64_t matrixTo; //stores the global index of the last line
+
+	size_t lineWidth;
+	size_t procLines;
 };
 
 struct calculation_results
@@ -87,15 +90,6 @@ struct options
 	uint64_t termination;    /* termination condition */
 	uint64_t term_iteration; /* terminate if iteration number reached */
 	double   term_precision; /* terminate if precision reached */
-};
-
-struct init_args
-{
-	double* Matrix;
-	uint64_t thread_num;
-	struct options const* options;
-	uint64_t lineWidth; //line width
-	uint64_t procLines; //matrix lines per process
 };
 
 struct shared_args
@@ -347,35 +341,7 @@ pop()
 static void
 allocateMatrices(struct calculation_arguments* arguments)
 {
-	arguments->M = allocateMemory(arguments->num_matrices * arguments->procLines * arguments->lineWidth * sizeof(double));
-}
-
-/* ************************************************************************ */
-/* initMatrices_t: per-thread function to zero out the matrix               */
-/* ************************************************************************ */
-static void *
-initMatrices_t(void *data)
-{
-	struct init_args *args = (struct init_args *)data;
-	uint64_t num_threads = args->options->number;
-	uint64_t thread_num = args->thread_num;
-	uint64_t method = args->options->method;
-	uint64_t matrixSize = args->matrixSize;
-	matrixSize <<= method == METH_JACOBI ? 1 : 0;
-	double* Matrix = args->Matrix;
-
-	size_t count = matrixSize / num_threads;
-	size_t remainder = matrixSize % num_threads;
-	size_t lower = thread_num * count;
-	size_t upper = lower + count;
-
-	lower += thread_num < remainder ? thread_num : remainder;
-	upper += thread_num < remainder ? thread_num + 1 : remainder;
-
-	for (size_t i = lower; i < upper; ++i)
-		Matrix[i] = 0;
-
-	return NULL;
+	arguments->M = allocateMemory(arguments->num_matrices * (arguments->procLines + 2) * arguments->lineWidth * sizeof(double));
 }
 
 /* ************************************************************************ */
@@ -392,23 +358,11 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 
 	matrix Matrix = (matrix)arguments->M;
 
-	struct init_args t_args[options->number];
-	pthread_t threads[options->number];
-
 	/* initialize matrix/matrices with zeros */
-	for (uint64_t t = 0; t < options->number; ++t)
-	{
-		t_args[t].Matrix = arguments->M;
-		t_args[t].matrixSize = matrixSize;
-		t_args[t].options = options;
-		t_args[t].thread_num = t;
-		pthread_create(&threads[t], NULL, initMatrices_t, (void *)&t_args[t]);
-	}
-
-	for (uint64_t t = 0; t < options->number; ++t)
-	{
-		pthread_join(threads[t], NULL);
-	}
+	for (size_t g = 0; g < arguments->num_matrices; g++)
+		for (size_t i = 0; i <= N; i++)
+			for (size_t j = 0; j <= N; j++)
+				Matrix[g][i][j] = 0.0;
 
 	/* initialize borders, depending on function (function 2: nothing to do) */
 	uint64_t g, y, x, i; /* local variables for loops */
@@ -462,21 +416,13 @@ calculate_func(struct calculation_arguments const* arguments, struct options con
 }
 
 /* ************************************************************************ */
-/* calculate_t: gets run by each thread to solve the equation               */
+/* calculate: solves the equation                                           */
 /* ************************************************************************ */
-static void *
-calculate_t(void *data)
+static void
+calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	struct shared_args *args = (struct shared_args *)data;
-	struct calculation_arguments const *arguments = args->arguments;
-	struct options const *options = args->options;
-	int const N = args->N;
-	typedef double(*matrix)[arguments->procLines][arguments->lineWidth];
-	matrix Matrix = (matrix)args->Matrix;
-	struct calculation_results *results = args->results;
-	int thread_num = args->thread_num;
-	pthread_barrier_t *inner_barrier = args->inner_barrier;
-	double *shared_maxresiduum = args->shared_maxresiduum;
+	typedef double(*matrix)[arguments->procLines + 2][arguments->lineWidth];
+	matrix Matrix = (matrix)arguments->M;
 
 	int i, j;			      /* local variables for loops */
 	int m1, m2;			      /* used as indices for old and new matrices */
@@ -499,50 +445,31 @@ calculate_t(void *data)
 		m2 = 0;
 	}
 
-	int count = arguments->procLines / options->number;
-	int remainder = arguments->procLines % options->number;
-	int lower = 1 + thread_num * count;
-	int upper = lower + count;
-
-	lower += thread_num < remainder ? thread_num : remainder;
-	upper += thread_num < remainder ? thread_num + 1 : remainder;
-
 	while (term_iteration > 0)
 	{
+		// TODO: Communicate lines
 		maxresiduum = 0.0;
 
 		/* over all rows */
-		for (i = lower; i < upper; i++)
+		for (i = 1; i < arguments->procLines; i++)
 		{
 			/* over all columns */
-			for (j = 1; j < arguments->lineWidth; j++)
+			for (j = 1; j < arguments->lineWidth - 1; j++)
 			{
-				//TODO: Exchange data via MPI
 				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
 
-				//TODO: Customize i and j parameters
 				star += calculate_func(arguments, options, i, j);
 
 				residuum = Matrix[m2][i][j] - star;
 				residuum = fabs(residuum);
-				
-				//TODO: Exchange data via MPI
 				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
 
 				Matrix[m1][i][j] = star;
 			}
 		}
-
+		MPI_Barrier(MPI_COMM_WORLD);
 		if (options->termination == TERM_PREC || term_iteration == 1)
-			shared_maxresiduum[thread_num] = maxresiduum;
-		pthread_barrier_wait(inner_barrier);
-		if (options->termination == TERM_PREC || term_iteration == 1)
-		{
-			for (uint64_t k = 0; k < options->number; ++k)
-			{
-				maxresiduum = (shared_maxresiduum[k] < maxresiduum) ? maxresiduum : shared_maxresiduum[k];
-			}
-		}
+			MPI_Allreduce(&maxresiduum, &maxresiduum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 		/* exchange m1 and m2 */
 		i = m1;
@@ -552,58 +479,16 @@ calculate_t(void *data)
 		/* check for stopping calculation depending on termination method */
 		if (options->termination == TERM_PREC)
 		{
-			pthread_barrier_wait(inner_barrier);
+			MPI_Barrier(MPI_COMM_WORLD);
 			if (maxresiduum < options->term_precision)
-			{
 				term_iteration = 0;
-			}
 		}
 		else if (options->termination == TERM_ITER)
-		{
 			term_iteration--;
-		}
 	}
-	if (thread_num == 0)
-	{
-		results->m = m2;
-		results->stat_iteration = stat_iteration;
-		results->stat_precision = maxresiduum;
-	}
-	return NULL;
-}
-
-/* ************************************************************************ */
-/* calculate: solves the equation                                           */
-/* ************************************************************************ */
-static void
-calculate(struct calculation_arguments const *arguments, struct calculation_results *results, struct options const *options)
-{
-	int const N = arguments->N;
-
-	struct shared_args args[options->number];
-	double shared_maxresiduum[options->number];
-
-	pthread_t threads[options->number];
-	pthread_barrier_t inner_barrier;
-	pthread_barrier_init(&inner_barrier, NULL, options->number);
-	for (uint64_t t = 0; t < options->number; ++t)
-	{
-		args[t].options = options;
-		args[t].N = N;
-		args[t].Matrix = arguments->M;
-		args[t].results = results;
-		args[t].thread_num = t;
-		args[t].inner_barrier = &inner_barrier;
-		args[t].shared_maxresiduum = (double *)&shared_maxresiduum;
-		args[t].arguments = arguments;
-
-		pthread_create(&threads[t], NULL, calculate_t, (void *)&args[t]);
-	}
-
-	for (uint64_t t = 0; t < options->number; ++t)
-	{
-		pthread_join(threads[t], NULL);
-	}
+	results->m = m2;
+	results->stat_iteration = stat_iteration;
+	results->stat_precision = maxresiduum;
 }
 
 /* ************************************************************************ */
