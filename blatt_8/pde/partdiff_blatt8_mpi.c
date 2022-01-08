@@ -35,7 +35,6 @@
 #include <malloc.h>
 #include <string.h>
 #include <sys/time.h>
-#include <pthread.h>
 #include <mpi.h>
 
 /* ************* */
@@ -90,18 +89,6 @@ struct options
 	uint64_t termination;    /* termination condition */
 	uint64_t term_iteration; /* terminate if iteration number reached */
 	double   term_precision; /* terminate if precision reached */
-};
-
-struct shared_args
-{
-	double* Matrix;
-	double* shared_maxresiduum;
-	uint64_t thread_num;
-	struct options const* options;
-	struct calculation_arguments const* arguments;
-	struct calculation_results* results;
-	pthread_barrier_t* inner_barrier;
-	int N;
 };
 
 struct vector
@@ -232,9 +219,7 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 {
 	arguments->R            = R; //store mpi rank
 	arguments->S            = S; //store mpi size
-	
-	printf("[MPI-DEBUG] R=%d, S=%d\n", R, S);
-	
+
 	arguments->N            = (options->interlines * 8) + 9 - 1;
 	arguments->num_matrices = (options->method == METH_JACOBI) ? 2 : 1;
 	arguments->h            = 1.0 / arguments->N;
@@ -242,14 +227,15 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 	arguments->lineWidth    = arguments->N + 1; //size of one matrix dimension
 	arguments->procLines    = arguments->lineWidth / S; //split global matrix to mpi processes
 	int const procLinesRem  = arguments->lineWidth % S;
-	if(procLinesRem != 0) {
+	if (R < procLinesRem)
 		arguments->procLines++;
-	}
 	arguments->matrixFrom   = arguments->procLines * R;
+	if (procLinesRem && R < procLinesRem)
+		arguments->matrixFrom += R;
+	else if (procLinesRem && R >= procLinesRem)
+		arguments->matrixFrom += procLinesRem;
 	arguments->matrixTo     = arguments->matrixFrom + arguments->procLines;
 	
-	printf("[MPI-DEBUG] lineWidth=%u procLines=%u, from=%u, to=%u\n", (unsigned int)arguments->lineWidth, (unsigned int)arguments->procLines, (unsigned int)arguments->matrixFrom, (unsigned int)arguments->matrixTo);
-
 	results->m              = 0;
 	results->stat_iteration = 0;
 	results->stat_precision = 0;
@@ -354,14 +340,14 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 	double const   h = arguments->h;
 	uint64_t const matrixSize = arguments->lineWidth * arguments->procLines;
 
-	typedef double(*matrix)[arguments->procLines][arguments->lineWidth];
+	typedef double(*matrix)[arguments->procLines + 2][arguments->lineWidth];
 
 	matrix Matrix = (matrix)arguments->M;
 
 	/* initialize matrix/matrices with zeros */
 	for (size_t g = 0; g < arguments->num_matrices; g++)
-		for (size_t i = 0; i <= N; i++)
-			for (size_t j = 0; j <= N; j++)
+		for (size_t i = 0; i < arguments->lineWidth; i++)
+			for (size_t j = 0; j <= arguments->procLines + 1; j++)
 				Matrix[g][i][j] = 0.0;
 
 	/* initialize borders, depending on function (function 2: nothing to do) */
@@ -447,7 +433,53 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 
 	while (term_iteration > 0)
 	{
-		// TODO: Communicate lines
+		/* First rank */
+		if (0 == arguments->R)
+		{
+			MPI_Send(&Matrix[m2][arguments->procLines -1][0], arguments->lineWidth, MPI_DOUBLE, 1, 0xFF, MPI_COMM_WORLD);
+			MPI_Recv(&Matrix[m2][arguments->procLines][0], arguments->lineWidth, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+
+		/* Last rank */
+		else if (arguments->S - 1 == arguments->R)
+		{
+			/* Odd last rank */
+			if (arguments->R & 1)
+			{
+				MPI_Recv(&Matrix[m2][0][0], arguments->lineWidth, MPI_DOUBLE, arguments->R - 1, 0xFF, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Send(&Matrix[m2][1][0], arguments->lineWidth, MPI_DOUBLE, arguments->R -1, 0, MPI_COMM_WORLD);
+			}
+
+			/* Even last rank */
+			else
+			{
+				MPI_Send(&Matrix[m2][1][0], arguments->lineWidth, MPI_DOUBLE, arguments->R -1, 0, MPI_COMM_WORLD);
+				MPI_Recv(&Matrix[m2][0][0], arguments->lineWidth, MPI_DOUBLE, arguments->R - 1, 0xFF, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
+		}
+
+		/* All other ranks */
+		else
+		{
+			/* Odd rank */
+			if (arguments->R & 1)
+			{
+				MPI_Recv(&Matrix[m2][0][0], arguments->lineWidth, MPI_DOUBLE, arguments->R - 1, 0xFF, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Send(&Matrix[m2][1][0], arguments->lineWidth, MPI_DOUBLE, arguments->R -1, 0, MPI_COMM_WORLD);
+				MPI_Recv(&Matrix[m2][arguments->procLines][0], arguments->lineWidth, MPI_DOUBLE, arguments->R +1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Send(&Matrix[m2][arguments->procLines -1][0], arguments->lineWidth, MPI_DOUBLE, arguments->R + 1, 0xFF, MPI_COMM_WORLD);
+			}
+
+			/* Even rank */
+			else
+			{
+				MPI_Send(&Matrix[m2][1][0], 1, MPI_DOUBLE, arguments->R -1, 0, MPI_COMM_WORLD);
+				MPI_Recv(&Matrix[m2][0][0], 1, MPI_DOUBLE, arguments->R - 1, 0xFF, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Send(&Matrix[m2][arguments->procLines -1][0], arguments->lineWidth, MPI_DOUBLE, arguments->R +1, 0xFF, MPI_COMM_WORLD);
+				MPI_Recv(&Matrix[m2][arguments->procLines][0], arguments->lineWidth, MPI_DOUBLE, arguments->R + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
+		}
+
 		maxresiduum = 0.0;
 
 		/* over all rows */
@@ -655,7 +687,8 @@ main(int argc, char** argv)
 	calculate(&arguments, &results, &options);
 	gettimeofday(&comp_time, NULL);
 
-	displayStatistics(&arguments, &results, &options);
+	if (R == 0)
+		displayStatistics(&arguments, &results, &options);
 	displayMatrixMpi(&arguments, &results, &options);
 
 	cleanup();
