@@ -1,5 +1,5 @@
 CFLAGSGCC = -std=c11 -Wall -Wextra -Wpedantic -Ofast -fopenmp
-CFLAGSMPICC = -std=c11 -Wall -Wextra -Wpedantic -O3 -g -fopenmp
+CFLAGSMPICC = -std=c11 -Wall -Wextra -Wpedantic -O3 -g
 GCC = gcc
 MPICC = mpicc
 
