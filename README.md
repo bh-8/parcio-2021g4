@@ -3,8 +3,8 @@
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
 ### Blatt 9 - Parallelisierung mit MPI (Gauß-Seidel)
-- Übungsblatt: ausstehend
-- Abgabe: ausstehend
+- Übungsblatt: [PP_2021_Uebung_09_MPI_Gauss_Seidel-p-314.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_09_MPI_Gauss_Seidel-p-314.pdf)
+- Abgabe: ausstehend (22.01.2022, 23:59)
 - Bewertung: ausstehend
 ### Blatt 8 - Parallelisierung mit MPI (Jacobi)
 - Übungsblatt: [PP_2021_Uebung_08_MPI_Jacobi-p-306.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_08_MPI_Jacobi-p-306.pdf)
@@ -25,7 +25,7 @@
     - ermitteln Sie die Leistungsdaten Ihres Hybrid-Programms und vergleichen Sie die Laufzeiten in einem Diagramm
     - wiederholen Sie dabei jede Messung mindestens drei Mal, um aussagekräftige Mittelwerte bilden zu können
     - schreiben Sie eine halbe Seite Interpretation zu diesen Ergebnissen
-- Abgabe: ausstehend (08.01.2022, 23:59)
+- Abgabe: ausstehend (15.01.2022, 23:59)
 - Bewertung: ausstehend
 ### Blatt 7 - MPI-Einführung
 - Übungsblatt: [PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf](https://parcio.ovgu.de/parcio_media/Teaching/Winter+2021_2022/Parallele+Programmierung/PP_2021_Uebung_07_MPI_Einfuehrung-p-298.pdf)
