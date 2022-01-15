@@ -2,12 +2,21 @@ Die Bearbeitungszeit bitte in ganzen Stunden angeben (aufrunden).
 In den restlichen Zeilen jeweils ein X in der zutreffenden Spalte setzen.
 
 Bearbeitungszeit:  
-Schwierigkeit:     [ ] zu leicht         [ ] genau richtig     [ ] zu schwer
-Lehrreich:         [ ] wenig             [ ] etwas             [ ] sehr
-Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [ ] verständlich
+Schwierigkeit:     [ ] zu leicht         [x] genau richtig     [ ] zu schwer
+Lehrreich:         [ ] wenig             [x] etwas             [ ] sehr
+Verständlichkeit:  [ ] großteils unklar  [ ] teilweise unklar  [x] verständlich
 
 Kommentar:
 Zeitaufwand zu groß? Wo sind Sie nicht weiter gekommen?
+Wir haben das Programm mehrmals neu geschrieben, deswegen ist der Zeitaufwand
+etwas hoeher als sonst ausgefallen.
+
 Was war zu schwer oder unverständlich?
+Das Debuggen mit MPI hat erneut Probleme bereitet, off-by-one Fehler mit
+printfs zu finden war nicht sehr angenehm.
+
 Was könnten wir verbessern?
+-
+
 Was hat Ihnen besonders gut gefallen?
+-
