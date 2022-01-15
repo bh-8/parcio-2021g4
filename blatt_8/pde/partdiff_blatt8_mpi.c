@@ -210,6 +210,15 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 	uint64_t from           = rank * local_to;
 	uint64_t to             = from + local_to;
 
+	if (rank == 0)
+	{
+		from++;
+	}
+	if (size - rank == 1)
+	{
+		to--;
+	}
+
 	arguments->local_to     = rank < remainder ? local_to + 1 : local_to;
 	arguments->from         = rank < remainder ? from + rank : from + remainder;
 	arguments->to           = rank < remainder ? to + rank + 1 : to + remainder;
@@ -631,12 +640,14 @@ main(int argc, char** argv)
 	askParams(&options, argc, argv);
 	initVariables(&arguments, &results, &options);
 	allocateMatrices(&arguments);
-	initMatrices(&arguments, &options);	if (options.rank == 0)
+	initMatrices(&arguments, &options);
+	if (options.rank == 0)
 	{
 		gettimeofday(&start_time, NULL);
 	}
 
-	calculate(&arguments, &results, &options);	if (options.rank == 0)
+	calculate(&arguments, &results, &options);
+	if (options.rank == 0)
 	{
 		gettimeofday(&comp_time, NULL);
 	}
