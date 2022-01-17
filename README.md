@@ -3,7 +3,7 @@
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
 ### Blatt 9 - Parallelisierung mit MPI (Gauß-Seidel)
-- Übungsblatt: [PP_2021_Uebung_09_MPI_Gauss_Seidel-p-314.pdf](https://github.com/birne420/parcio-2021g4/blob/main/aufgaben/PP_2021_Uebung_09_MPI_Gauss_Seidel-p-314.pdf)
+- Übungsblatt: [PP-2021-Uebung-09-MPI-Gauss-Seidel.pdf](https://github.com/birne420/parcio-2021g4/blob/main/aufgaben/PP-2021-Uebung-09-MPI-Gauss-Seidel.pdf)
 - Abgabe: ausstehend (22.01.2022, 23:59)
 - Bewertung: ausstehend
 ### Blatt 8 - Parallelisierung mit MPI (Jacobi)
