@@ -33,6 +33,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <sys/time.h>
+#include <mpi.h>
 
 /* ************* */
 /* Some defines. */
@@ -76,6 +77,8 @@ struct options
 	uint64_t termination;    /* termination condition */
 	uint64_t term_iteration; /* terminate if iteration number reached */
 	double   term_precision; /* terminate if precision reached */
+	int      rank;           /* mpi rank */
+	int      size;           /* mpi size */
 };
 
 /* ************************************************************************ */
@@ -477,9 +480,14 @@ displayMatrix(struct calculation_arguments* arguments, struct calculation_result
 int
 main(int argc, char** argv)
 {
+	MPI_Init(&argc, &argv);
+
 	struct options               options;
 	struct calculation_arguments arguments;
 	struct calculation_results   results;
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &options.rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &options.size);
 
 	askParams(&options, argc, argv);
 
@@ -496,6 +504,8 @@ main(int argc, char** argv)
 	displayMatrix(&arguments, &results, &options);
 
 	freeMatrices(&arguments);
+
+	MPI_Finalize();
 
 	return 0;
 }
