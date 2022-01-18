@@ -57,8 +57,11 @@ struct calculation_arguments
 {
 	uint64_t N;            /* number of spaces between lines (lines=N+1) */
 	uint64_t num_matrices; /* number of matrices */
+	uint64_t local_to;     /* local ending line of this process */
 	double   h;            /* length of a space between two lines */
 	double*  M;            /* two matrices with real values */
+	int      from;         /* global starting line of this process */
+	int      to;           /* global ending line of this process */
 };
 
 struct calculation_results
@@ -200,6 +203,26 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 	arguments->num_matrices = (options->method == METH_JACOBI) ? 2 : 1;
 	arguments->h            = 1.0 / arguments->N;
 
+	uint64_t rank           = options->rank;
+	uint64_t size           = options->size;
+	uint64_t local_to       = arguments->N / size;
+	uint64_t remainder      = arguments->N % size;
+	uint64_t from           = rank * local_to;
+	uint64_t to             = from + local_to;
+	
+	if (rank == 0)
+	{
+		from++;
+	}
+	if (size - rank == 1)
+	{
+		to--;
+	}
+
+	arguments->local_to     = rank < remainder ? local_to + 1 : local_to;
+	arguments->from         = rank < remainder ? from + rank : from + remainder;
+	arguments->to           = rank < remainder ? to + rank + 1 : to + remainder;
+	
 	results->m              = 0;
 	results->stat_iteration = 0;
 	results->stat_precision = 0;
@@ -239,8 +262,9 @@ static void
 allocateMatrices(struct calculation_arguments* arguments)
 {
 	uint64_t const N = arguments->N;
+	uint64_t const local_to = arguments->local_to;
 
-	arguments->M = allocateMemory(arguments->num_matrices * (N + 1) * (N + 1) * sizeof(double));
+	arguments->M = allocateMemory(arguments->num_matrices * (local_to + 2) * (N + 1) * sizeof(double));
 }
 
 /* ************************************************************************ */
@@ -251,17 +275,19 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 {
 	uint64_t g, i, j; /* local variables for loops */
 
-	uint64_t const N = arguments->N;
-	double const   h = arguments->h;
+	uint64_t const  N = arguments->N;
+	double const    h = arguments->h;
+	uint64_t local_to = arguments->local_to;
+	uint64_t from     = arguments->from;
 
-	typedef double(*matrix)[N + 1][N + 1];
+	typedef double(*matrix)[local_to + 2][N + 1];
 
 	matrix Matrix = (matrix)arguments->M;
 
 	/* initialize matrix/matrices with zeros */
 	for (g = 0; g < arguments->num_matrices; g++)
 	{
-		for (i = 0; i <= N; i++)
+		for (i = 0; i <= local_to + 1; i++)
 		{
 			for (j = 0; j <= N; j++)
 			{
@@ -270,20 +296,48 @@ initMatrices(struct calculation_arguments* arguments, struct options const* opti
 		}
 	}
 
+	uint64_t global_i = from;
+
 	/* initialize borders, depending on function (function 2: nothing to do) */
 	if (options->inf_func == FUNC_F0)
 	{
+		if (options->rank == 0)
+		{
+			for (g = 0; g < arguments->num_matrices; g++)
+			{
+				for (i = 0, global_i = from; i <= local_to; i++, global_i++)
+				{
+					for (j = 0; j <= N; j++)
+					{
+						Matrix[g][0][j] = 1.0 - (h * global_i);
+					}
+				}
+			}
+		}
+
+		if (options->size - options->rank == 1)
+		{
+			for (g = 0; g < arguments->num_matrices; g++)
+			{
+				for (i = 0, global_i = from; i <= local_to; i++, global_i++)
+				{
+					for (j = 0; j <= N; j++)
+					{
+						Matrix[g][local_to][j] = h * global_i;
+					}
+				}
+			}
+		}
+
 		for (g = 0; g < arguments->num_matrices; g++)
 		{
-			for (i = 0; i <= N; i++)
+			for (i = 0, global_i = from; i <= local_to; i++, global_i++)
 			{
-				Matrix[g][i][0] = 1.0 - (h * i);
-				Matrix[g][i][N] = h * i;
-				Matrix[g][0][i] = 1.0 - (h * i);
-				Matrix[g][N][i] = h * i;
+				Matrix[g][i][0] = 1.0 - (h * global_i);
+				Matrix[g][i][N] = h * global_i;
 			}
 
-			Matrix[g][N][0] = 0.0;
+			Matrix[g][local_to][0] = 0.0;
 			Matrix[g][0][N] = 0.0;
 		}
 	}
@@ -313,18 +367,22 @@ calculate_func(struct calculation_arguments const* arguments, struct options con
 static void
 calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	int    i, j;        /* local variables for loops */
-	int    m1, m2;      /* used as indices for old and new matrices */
-	double star;        /* four times center value minus 4 neigh.b values */
-	double residuum;    /* residuum of current iteration */
-	double maxresiduum; /* maximum residuum value of a slave in iteration */
+	uint64_t    i, j;        /* local variables for loops */
+	int    		m1, m2;      /* used as indices for old and new matrices */
+	double 		star;        /* four times center value minus 4 neigh.b values */
+	double 		residuum;    /* residuum of current iteration */
+	double 		maxresiduum; /* maximum residuum value of a slave in iteration */
 
-	int const N = arguments->N;
+	uint64_t stat_iteration = 0;
+	uint64_t term_iteration = options->term_iteration;
+	uint64_t N              = arguments->N;
+	uint64_t local_to       = arguments->local_to;
+	uint64_t from           = arguments->from;
+	uint64_t global_i       = from;
+	const int rank          = options->rank;
+	const int size          = options->size;
 
-	int term_iteration = options->term_iteration;
-
-	typedef double(*matrix)[N + 1][N + 1];
-
+	typedef double(*matrix)[arguments->local_to + 1][N + 1];
 	matrix Matrix = (matrix)arguments->M;
 
 	/* initialize m1 and m2 depending on algorithm */
@@ -474,6 +532,82 @@ displayMatrix(struct calculation_arguments* arguments, struct calculation_result
 	fflush(stdout);
 }
 
+static void
+displayMatrixMpi(struct calculation_arguments* arguments, struct calculation_results* results, struct options* options, int rank, int size, int from, int to)
+{
+	int const elements = 8 * options->interlines + 9;
+
+	int x, y;
+
+	typedef double(*matrix)[to - from + 3][arguments->N + 1];
+	matrix Matrix = (matrix)arguments->M;
+	int m = results->m;
+
+	MPI_Status status;
+
+	// Die erste Zeile gehört zu Rang 0
+	if (rank == 0) {
+		from--;
+	}
+
+	// Die letzte Zeile gehört zu Rang (size - 1)
+	if (rank == size - 1) {
+		to++;
+	}
+
+	if (rank == 0) {
+		printf("Matrix:\n");
+	}
+
+	for (y = 0; y < 9; y++)
+	{
+		int line = y * (options->interlines + 1);
+
+		if (rank == 0)
+		{
+			// Prüfen, ob die Zeile zu Rang 0 gehört
+			if (line < from || line > to)
+			{
+				// Der Tag wird genutzt, um Zeilen in der richtigen Reihenfolge zu empfangen
+				// Matrix[m][0] wird überschrieben, da die Werte nicht mehr benötigt werden
+				MPI_Recv(Matrix[m][0], elements, MPI_DOUBLE, MPI_ANY_SOURCE, 42 + y, MPI_COMM_WORLD, &status);
+			}
+		}
+		else
+		{
+			if (line >= from && line <= to)
+			{
+				// Zeile an Rang 0 senden, wenn sie dem aktuellen Prozess gehört
+				// (line - from + 1) wird genutzt, um die lokale Zeile zu berechnen
+				MPI_Send(Matrix[m][line - from + 1], elements, MPI_DOUBLE, 0, 42 + y, MPI_COMM_WORLD);
+			}
+		}
+
+		if (rank == 0)
+		{
+			for (x = 0; x < 9; x++)
+			{
+				int col = x * (options->interlines + 1);
+
+				if (line >= from && line <= to)
+				{
+					// Diese Zeile gehört zu Rang 0
+					printf("%7.4f", Matrix[m][line][col]);
+				}
+				else
+				{
+					// Diese Zeile gehört zu einem anderen Rang und wurde weiter oben empfangen
+					printf("%7.4f", Matrix[m][0][col]);
+				}
+			}
+
+			printf("\n");
+		}
+	}
+
+	fflush(stdout);
+}
+
 /* ************************************************************************ */
 /*  main                                                                    */
 /* ************************************************************************ */
@@ -496,12 +630,30 @@ main(int argc, char** argv)
 	allocateMatrices(&arguments);
 	initMatrices(&arguments, &options);
 
-	gettimeofday(&start_time, NULL);
-	calculate(&arguments, &results, &options);
-	gettimeofday(&comp_time, NULL);
+	if (options.rank == 0)
+	{
+		gettimeofday(&start_time, NULL);
+	}
 
-	displayStatistics(&arguments, &results, &options);
-	displayMatrix(&arguments, &results, &options);
+	calculate(&arguments, &results, &options);
+	if (options.rank == 0)
+	{
+		gettimeofday(&comp_time, NULL);
+	}
+
+	if (options.rank == 0)
+	{
+		displayStatistics(&arguments, &results, &options);
+	}
+
+	if (options.size == 1)
+	{
+		displayMatrix(&arguments, &results, &options);
+	}
+	else
+	{
+		displayMatrixMpi(&arguments, &results, &options, options.rank, options.size, arguments.from, arguments.to);
+	}
 
 	freeMatrices(&arguments);
 
