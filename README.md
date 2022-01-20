@@ -3,8 +3,8 @@
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
 ## Gesamtpunktzahl
-- 2,377 / 2,320 (102.45%)
-- Stand inkl. Blatt 7, 15.12.2021
+- 2,632 / 2,740 (96.06%)
+- Stand inkl. Blatt 8, 20.01.2022
 ---
 ### Blatt 9 - Parallelisierung mit MPI (Gauß-Seidel)
 - Übungsblatt: [PP-2021-Uebung-09-MPI-Gauss-Seidel.pdf](https://github.com/birne420/parcio-2021g4/blob/main/aufgaben/PP-2021-Uebung-09-MPI-Gauss-Seidel.pdf)
@@ -42,4 +42,4 @@
 ### Blatt 8 - Parallelisierung mit MPI (Jacobi)
 - Übungsblatt: [PP-2021-Uebung-08-MPI-Jacobi.pdf](https://github.com/birne420/parcio-2021g4/blob/main/aufgaben/PP-2021-Uebung-08-MPI-Jacobi.pdf)
 - Abgabe: [GoepfertWelzerDavidBirnbaum.tar.gz](https://github.com/birne420/parcio-2021g4/blob/main/blatt_8/_abgabe/GoepfertWelzerDavidBirnbaum.tar.gz?raw=true)
-- Bewertung: ausstehend
+- Bewertung: [bewertung.pdf](https://github.com/birne420/parcio-2021g4/blob/main/blatt_8/_abgabe/bewertung.pdf?raw=true) (255/420)
