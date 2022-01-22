@@ -372,12 +372,11 @@ calculate_func(struct calculation_arguments const* arguments, struct options con
 }
 
 /* ************************************************************************ */
-/* calculate: solves the equation                                           */
+/* calculate_gauss_seidel: solves the equation with Gauss Seidel            */
 /* ************************************************************************ */
 static void
-calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
+calculate_gauss_seidel(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	/* THIS BREAKS JACOBI, FIX LATER */
 	uint64_t 	i, j;        /* local variables for loops */
 	int 		direction;   /* direction for diagonal traversal */
 	double 		star;        /* four times center value minus 4 neigh.b values */
@@ -499,6 +498,103 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	}
 
 	results->m = 0;
+	results->stat_iteration = stat_iteration;
+	results->stat_precision = maxresiduum;
+}
+
+/* ************************************************************************ */
+/* calculate_jacobi: solves the equation with Jacobi                        */
+/* ************************************************************************ */
+static void
+calculate_jacobi(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
+{
+	uint64_t i, j;			      /* local variables for loops */
+	int m1, m2;			      /* used as indices for old and new matrices */
+	double star;		      /* four times center value minus 4 neigh.b values */
+	double residuum;	      /* residuum of current iteration */
+	double maxresiduum = 0.0; /* maximum residuum value of a slave in iteration */
+
+	uint64_t stat_iteration = 0;
+	uint64_t term_iteration = options->term_iteration;
+	uint64_t N              = arguments->N;
+	uint64_t local_to       = arguments->local_to;
+	uint64_t from           = arguments->from;
+	uint64_t global_i       = from;
+	const int rank          = options->rank;
+	const int size          = options->size;
+
+	/* initialize m1 and m2 depending on algorithm */
+	if (options->method == METH_JACOBI)
+	{
+		m1 = 0;
+		m2 = 1;
+	}
+	else
+	{
+		m1 = 0;
+		m2 = 0;
+	}
+
+	if (size - rank != 1)
+	{
+		++local_to;
+	}
+
+	typedef double(*matrix)[local_to + 1][N + 1];
+	matrix Matrix = (matrix)arguments->M;
+
+	while (term_iteration > 0)
+	{
+		maxresiduum = 0.0;
+
+		/* over all rows */
+		for (i = 1, global_i = from; i < local_to; i++, global_i++)
+		{
+			/* over all columns */
+			for (j = 1; j < N; j++)
+			{
+				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
+
+				star += calculate_func(arguments, options, global_i, j);
+
+				residuum = Matrix[m2][i][j] - star;
+				residuum = fabs(residuum);
+				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+
+				Matrix[m1][i][j] = star;
+			}
+		}
+
+		if (options->termination == TERM_PREC || term_iteration == 1)
+			MPI_Allreduce(&maxresiduum, &maxresiduum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
+		if (size != 1)
+		{
+			if (rank != 0)
+			{
+				MPI_Sendrecv(&Matrix[m1][1][1], N - 1, MPI_DOUBLE, rank - 1, 0, &Matrix[m1][0][1], N - 1, MPI_DOUBLE, rank - 1, 255, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
+			if (size - rank != 1)
+			{
+				MPI_Sendrecv(&Matrix[m1][local_to - 1][1], N - 1, MPI_DOUBLE, rank + 1, 255, &Matrix[m1][local_to][1], N - 1, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
+		}
+
+		/* exchange m1 and m2 */
+		i = m1;
+		m1 = m2;
+		m2 = i;
+		stat_iteration++;
+		/* check for stopping calculation depending on termination method */
+		if (options->termination == TERM_PREC)
+		{
+			if (maxresiduum < options->term_precision)
+				term_iteration = 0;
+		}
+		else if (options->termination == TERM_ITER)
+			term_iteration--;
+	}
+	results->m = m2;
 	results->stat_iteration = stat_iteration;
 	results->stat_precision = maxresiduum;
 }
@@ -696,7 +792,15 @@ main(int argc, char** argv)
 		gettimeofday(&start_time, NULL);
 	}
 
-	calculate(&arguments, &results, &options);
+	if (options.method == METH_GAUSS_SEIDEL)
+	{
+		calculate_gauss_seidel(&arguments, &results, &options);
+	}
+	else
+	{
+		calculate_jacobi(&arguments, &results, &options);
+	}
+
 	if (options.rank == 0)
 	{
 		gettimeofday(&comp_time, NULL);
