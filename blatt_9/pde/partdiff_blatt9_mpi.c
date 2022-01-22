@@ -116,6 +116,20 @@ usage(char* name)
 	printf("Example: %s 1 2 100 1 2 100 \n", name);
 }
 
+static inline void
+exit_success()
+{
+	MPI_Finalize();
+	exit(EXIT_SUCCESS);
+}
+
+static inline void
+exit_failure()
+{
+	MPI_Finalize();
+	exit(EXIT_FAILURE);
+}
+
 static void
 askParams(struct options* options, int argc, char** argv)
 {
@@ -124,7 +138,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (argc < 7 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-?") == 0)
 	{
 		usage(argv[0]);
-		exit(0);
+		exit_success();
 	}
 
 	ret = sscanf(argv[1], "%" SCNu64, &(options->number));
@@ -132,7 +146,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->number >= 1 && options->number <= MAX_THREADS))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[2], "%" SCNu64, &(options->method));
@@ -140,7 +154,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->method == METH_GAUSS_SEIDEL || options->method == METH_JACOBI))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[3], "%" SCNu64, &(options->interlines));
@@ -148,7 +162,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->interlines <= MAX_INTERLINES))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[4], "%" SCNu64, &(options->inf_func));
@@ -156,7 +170,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->inf_func == FUNC_F0 || options->inf_func == FUNC_FPISIN))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[5], "%" SCNu64, &(options->termination));
@@ -164,7 +178,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->termination == TERM_PREC || options->termination == TERM_ITER))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	if (options->termination == TERM_PREC)
@@ -176,7 +190,7 @@ askParams(struct options* options, int argc, char** argv)
 		if (ret != 1 || !(options->term_precision >= 1e-20 && options->term_precision <= 1e-4))
 		{
 			usage(argv[0]);
-			exit(1);
+			exit_failure();
 		}
 	}
 	else
@@ -188,7 +202,7 @@ askParams(struct options* options, int argc, char** argv)
 		if (ret != 1 || !(options->term_iteration >= 1 && options->term_iteration <= MAX_ITERATION))
 		{
 			usage(argv[0]);
-			exit(1);
+			exit_failure();
 		}
 	}
 }
@@ -209,7 +223,7 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 	uint64_t remainder      = arguments->N % size;
 	uint64_t from           = rank * local_to;
 	uint64_t to             = from + local_to;
-	
+
 	if (rank == 0)
 	{
 		from++;
@@ -222,7 +236,7 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 	arguments->local_to     = rank < remainder ? local_to + 1 : local_to;
 	arguments->from         = rank < remainder ? from + rank : from + remainder;
 	arguments->to           = rank < remainder ? to + rank + 1 : to + remainder;
-	
+
 	results->m              = 0;
 	results->stat_iteration = 0;
 	results->stat_precision = 0;
@@ -249,7 +263,7 @@ allocateMemory(size_t size)
 	if ((p = malloc(size)) == NULL)
 	{
 		printf("Speicherprobleme! (%" PRIu64 " Bytes angefordert)\n", size);
-		exit(1);
+		exit_failure();
 	}
 
 	return p;
@@ -382,9 +396,6 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	const int rank          = options->rank;
 	const int size          = options->size;
 
-	typedef double(*matrix)[arguments->local_to + 1][N + 1];
-	matrix Matrix = (matrix)arguments->M;
-
 	/* initialize m1 and m2 depending on algorithm */
 	if (options->method == METH_JACOBI)
 	{
@@ -396,18 +407,28 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		m1 = 0;
 		m2 = 0;
 	}
+
+	if (size - rank != 1)
+	{
+		++local_to;
+	}
+
+	typedef double(*matrix)[local_to + 1][N + 1];
+	matrix Matrix = (matrix)arguments->M;
+
 	while (term_iteration > 0)
 	{
-		maxresiduum = 0;
+		maxresiduum = 0.0;
+
 		/* over all rows */
-		for (i = 1; i < N; i++)
+		for (i = 1, global_i = from; i < local_to; i++, global_i++)
 		{
 			/* over all columns */
 			for (j = 1; j < N; j++)
 			{
 				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
 
-				star += calculate_func(arguments, options, i, j);
+				star += calculate_func(arguments, options, global_i, j);
 
 				residuum    = Matrix[m2][i][j] - star;
 				residuum    = fabs(residuum);
@@ -417,14 +438,14 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 			}
 		}
 
-		results->stat_iteration++;
-		results->stat_precision = maxresiduum;
+		if (options->termination == TERM_PREC || term_iteration == 1)
+			MPI_Allreduce(&maxresiduum, &maxresiduum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
 		/* exchange m1 and m2 */
 		i  = m1;
 		m1 = m2;
 		m2 = i;
-
+		stat_iteration++;
 		/* check for stopping calculation depending on termination method */
 		if (options->termination == TERM_PREC)
 		{
@@ -440,6 +461,8 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	}
 
 	results->m = m2;
+	results->stat_iteration = stat_iteration;
+	results->stat_precision = maxresiduum;
 }
 
 /* ************************************************************************ */
@@ -657,7 +680,5 @@ main(int argc, char** argv)
 
 	freeMatrices(&arguments);
 
-	MPI_Finalize();
-
-	return 0;
+	exit_success();
 }

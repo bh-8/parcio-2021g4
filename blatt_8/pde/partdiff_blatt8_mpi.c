@@ -116,6 +116,20 @@ usage(char* name)
 	printf("Example: %s 1 2 100 1 2 100 \n", name);
 }
 
+static inline void
+exit_success()
+{
+	MPI_Finalize();
+	exit(EXIT_SUCCESS);
+}
+
+static inline void
+exit_failure()
+{
+	MPI_Finalize();
+	exit(EXIT_FAILURE);
+}
+
 static void
 askParams(struct options* options, int argc, char** argv)
 {
@@ -124,7 +138,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (argc < 7 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-?") == 0)
 	{
 		usage(argv[0]);
-		exit(0);
+		exit_success();
 	}
 
 	ret = sscanf(argv[1], "%" SCNu64, &(options->number));
@@ -132,7 +146,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->number >= 1 && options->number <= MAX_THREADS))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[2], "%" SCNu64, &(options->method));
@@ -140,7 +154,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->method == METH_GAUSS_SEIDEL || options->method == METH_JACOBI))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[3], "%" SCNu64, &(options->interlines));
@@ -148,7 +162,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->interlines <= MAX_INTERLINES))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[4], "%" SCNu64, &(options->inf_func));
@@ -156,7 +170,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->inf_func == FUNC_F0 || options->inf_func == FUNC_FPISIN))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	ret = sscanf(argv[5], "%" SCNu64, &(options->termination));
@@ -164,7 +178,7 @@ askParams(struct options* options, int argc, char** argv)
 	if (ret != 1 || !(options->termination == TERM_PREC || options->termination == TERM_ITER))
 	{
 		usage(argv[0]);
-		exit(1);
+		exit_failure();
 	}
 
 	if (options->termination == TERM_PREC)
@@ -176,7 +190,7 @@ askParams(struct options* options, int argc, char** argv)
 		if (ret != 1 || !(options->term_precision >= 1e-20 && options->term_precision <= 1e-4))
 		{
 			usage(argv[0]);
-			exit(1);
+			exit_failure();
 		}
 	}
 	else
@@ -188,7 +202,7 @@ askParams(struct options* options, int argc, char** argv)
 		if (ret != 1 || !(options->term_iteration >= 1 && options->term_iteration <= MAX_ITERATION))
 		{
 			usage(argv[0]);
-			exit(1);
+			exit_failure();
 		}
 	}
 }
@@ -249,7 +263,7 @@ allocateMemory(size_t size)
 	if ((p = malloc(size)) == NULL)
 	{
 		printf("Speicherprobleme! (%" PRIu64 " Bytes angefordert)\n", size);
-		exit(1);
+		exit_failure();
 	}
 
 	return p;
@@ -666,7 +680,7 @@ main(int argc, char** argv)
 		displayMatrixMpi(&arguments, &results, &options, options.rank, options.size, arguments.from, arguments.to);
 	}
 
-	freeMatrices(&arguments);	MPI_Finalize();
+	freeMatrices(&arguments);
 
-	return EXIT_SUCCESS;
+	exit_success();
 }
