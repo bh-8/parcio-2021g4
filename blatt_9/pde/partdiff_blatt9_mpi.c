@@ -396,6 +396,13 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	const int rank          = options->rank;
 	const int size          = options->size;
 
+	MPI_Request req[N];
+
+	for (i = 0; i < N; ++i)
+	{
+		req[i] = MPI_REQUEST_NULL;
+	}
+
 	if (size - rank != 1)
 	{
 		++local_to;
@@ -407,6 +414,8 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	while (term_iteration > 0)
 	{
 		maxresiduum = 0.0;
+
+		MPI_Waitall(N, req, MPI_STATUSES_IGNORE);
 
 		for (i = 1, j = 1, direction = 0; i < local_to && j < N;)
 		{
@@ -425,7 +434,10 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 
 			Matrix[0][i][j] = star;
 
-			/* TODO: Send to next process */
+			if (size - rank != 1 && i == local_to - 1)
+			{
+				MPI_Isend(Matrix[local_to - 1][j], 1, MPI_DOUBLE, rank + 1, j, MPI_COMM_WORLD, &req[j - 1]);
+			}
 
 			/* upward diagonal direction */
 			if (direction == 0)
