@@ -410,7 +410,10 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 
 		for (i = 1, j = 1, direction = 0; i < local_to && j < N;)
 		{
-			/* TODO: Receive from previous process */
+			if (rank != 0 && i == 1)
+			{
+				MPI_Recv(Matrix[0][j], 1, MPI_DOUBLE, rank - 1, j, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
 
 			star = (Matrix[0][i - 1][j] + Matrix[0][i][j - 1] + Matrix[0][i][j + 1] + Matrix[0][i + 1][j]) / 4;
 
