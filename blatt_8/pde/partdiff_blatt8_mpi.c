@@ -382,9 +382,6 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	const int rank          = options->rank;
 	const int size          = options->size;
 
-	typedef double(*matrix)[arguments->local_to + 1][N + 1];
-	matrix Matrix = (matrix)arguments->M;
-
 	/* initialize m1 and m2 depending on algorithm */
 	if (options->method == METH_JACOBI)
 	{
@@ -401,6 +398,9 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	{
 		++local_to;
 	}
+
+	typedef double(*matrix)[local_to + 1][N + 1];
+	matrix Matrix = (matrix)arguments->M;
 
 	while (term_iteration > 0)
 	{
