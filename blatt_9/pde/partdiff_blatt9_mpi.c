@@ -452,7 +452,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 			else
 			{
 				/* lower limit hit, go right and change direction */
-				if (i == local_to)
+				if (i == local_to - 1)
 				{
 					++j;
 					direction = 0;
