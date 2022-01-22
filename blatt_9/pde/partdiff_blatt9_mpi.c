@@ -427,11 +427,13 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 			/* upward diagonal direction */
 			if (direction == 0)
 			{
+				/* right limit hit, go down and change direction */
 				if (j == N - 1)
 				{
 					++i;
 					direction = 255;
 				}
+				/* upper limit hit, go right and change direction */
 				else if (i == 1)
 				{
 					++j;
@@ -446,11 +448,13 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 			/* downward diagonal direction */
 			else
 			{
+				/* lower limit hit, go right and change direction */
 				if (i == local_to)
 				{
 					++j;
 					direction = 0;
 				}
+				/* left limit hit, go down and change direction */
 				else if (j == 1)
 				{
 					++i;
