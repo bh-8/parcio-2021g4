@@ -221,13 +221,9 @@ initVariables(struct calculation_arguments* arguments, struct calculation_result
 	uint64_t size           = options->size;
 	uint64_t local_to       = arguments->N / size;
 	uint64_t remainder      = arguments->N % size;
-	uint64_t from           = rank * local_to;
-	uint64_t to             = from + local_to;
+	uint64_t from           = rank * local_to + 1;
+	uint64_t to             = from + local_to - 1;
 
-	if (rank == 0)
-	{
-		from++;
-	}
 	if (size - rank == 1)
 	{
 		to--;
