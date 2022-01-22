@@ -381,8 +381,9 @@ calculate_func(struct calculation_arguments const* arguments, struct options con
 static void
 calculate(struct calculation_arguments const* arguments, struct calculation_results* results, struct options const* options)
 {
-	uint64_t    i, j;        /* local variables for loops */
-	int    		m1, m2;      /* used as indices for old and new matrices */
+	/* THIS BREAKS JACOBI, FIX LATER */
+	uint64_t 	i, j;        /* local variables for loops */
+	int 		direction;   /* direction for diagonal traversal */
 	double 		star;        /* four times center value minus 4 neigh.b values */
 	double 		residuum;    /* residuum of current iteration */
 	double 		maxresiduum; /* maximum residuum value of a slave in iteration */
@@ -391,22 +392,9 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	uint64_t term_iteration = options->term_iteration;
 	uint64_t N              = arguments->N;
 	uint64_t local_to       = arguments->local_to;
-	uint64_t from           = arguments->from;
-	uint64_t global_i       = from;
+	uint64_t from           = arguments->from - 1;
 	const int rank          = options->rank;
 	const int size          = options->size;
-
-	/* initialize m1 and m2 depending on algorithm */
-	if (options->method == METH_JACOBI)
-	{
-		m1 = 0;
-		m2 = 1;
-	}
-	else
-	{
-		m1 = 0;
-		m2 = 0;
-	}
 
 	if (size - rank != 1)
 	{
@@ -420,31 +408,66 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 	{
 		maxresiduum = 0.0;
 
-		/* over all rows */
-		for (i = 1, global_i = from; i < local_to; i++, global_i++)
+		for (i = 1, j = 1, direction = 0; i < local_to && j < N;)
 		{
-			/* over all columns */
-			for (j = 1; j < N; j++)
+			/* TODO: Receive from previous process */
+
+			star = (Matrix[0][i - 1][j] + Matrix[0][i][j - 1] + Matrix[0][i][j + 1] + Matrix[0][i + 1][j]) / 4;
+
+			star += calculate_func(arguments, options, i + from, j);
+
+			residuum    = Matrix[0][i][j] - star;
+			residuum    = fabs(residuum);
+			maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
+
+			Matrix[0][i][j] = star;
+
+			/* TODO: Send to next process */
+
+			/* upward diagonal direction */
+			if (direction == 0)
 			{
-				star = (Matrix[m2][i - 1][j] + Matrix[m2][i][j - 1] + Matrix[m2][i][j + 1] + Matrix[m2][i + 1][j]) / 4;
+				if (j == N - 1)
+				{
+					++i;
+					direction = 255;
+				}
+				else if (i == 1)
+				{
+					++j;
+					direction = 255;
+				}
+				else
+				{
+					--i, ++j;
+				}
+			}
 
-				star += calculate_func(arguments, options, global_i, j);
-
-				residuum    = Matrix[m2][i][j] - star;
-				residuum    = fabs(residuum);
-				maxresiduum = (residuum < maxresiduum) ? maxresiduum : residuum;
-
-				Matrix[m1][i][j] = star;
+			/* downward diagonal direction */
+			else
+			{
+				if (i == local_to)
+				{
+					++j;
+					direction = 0;
+				}
+				else if (j == 1)
+				{
+					++i;
+					direction = 0;
+				}
+				else
+				{
+					++i, --j;
+				}
 			}
 		}
 
 		if (options->termination == TERM_PREC || term_iteration == 1)
+		{
 			MPI_Allreduce(&maxresiduum, &maxresiduum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+		}
 
-		/* exchange m1 and m2 */
-		i  = m1;
-		m1 = m2;
-		m2 = i;
 		stat_iteration++;
 		/* check for stopping calculation depending on termination method */
 		if (options->termination == TERM_PREC)
@@ -460,7 +483,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		}
 	}
 
-	results->m = m2;
+	results->m = 0;
 	results->stat_iteration = stat_iteration;
 	results->stat_precision = maxresiduum;
 }
