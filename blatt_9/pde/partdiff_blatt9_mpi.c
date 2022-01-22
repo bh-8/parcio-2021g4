@@ -421,7 +421,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 		{
 			if (rank != 0 && i == 1)
 			{
-				MPI_Recv(Matrix[0][j], 1, MPI_DOUBLE, rank - 1, j, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Recv(&Matrix[0][0][j], 1, MPI_DOUBLE, rank - 1, j, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			}
 
 			star = (Matrix[0][i - 1][j] + Matrix[0][i][j - 1] + Matrix[0][i][j + 1] + Matrix[0][i + 1][j]) / 4;
@@ -436,7 +436,7 @@ calculate(struct calculation_arguments const* arguments, struct calculation_resu
 
 			if (size - rank != 1 && i == local_to - 1)
 			{
-				MPI_Isend(Matrix[local_to - 1][j], 1, MPI_DOUBLE, rank + 1, j, MPI_COMM_WORLD, &req[j - 1]);
+				MPI_Isend(&Matrix[0][local_to - 1][j], 1, MPI_DOUBLE, rank + 1, j, MPI_COMM_WORLD, &req[j - 1]);
 			}
 
 			/* upward diagonal direction */
