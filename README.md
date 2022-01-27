@@ -1,5 +1,4 @@
-# Parallele Programmierung WiSe 2021/22
-- [Arbeitsverzeichnis aktuelles Blatt](https://github.com/birne420/parcio-2021g4/tree/main/blatt_9)
+# Parallele Programmierung OvGU WiSe 2021/22
 - Website der Vorlesung: https://parcio.ovgu.de/Teaching/Winter+2021_2022/Parallele+Programmierung.html
 ---
 ## Gesamtpunktzahl
